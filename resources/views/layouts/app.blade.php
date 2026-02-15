@@ -1,40 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Attendance') }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COACHTECH</title>
+
+    <!-- 認証画面用CSS -->
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
 <body>
-<header>
-    <nav>
+
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="logo">COACHTECH</div>
+
         @auth
-            <form action="/logout" method="post" style="display:inline;">
+            <form method="POST" action="{{ route('logout') }}" class="logout-form">
                 @csrf
-                <button type="submit">ログアウト</button>
+                <button type="submit" class="logout-btn">ログアウト</button>
             </form>
         @endauth
+    </header>
 
-        @guest
-            <a href="/login">ログイン</a>
-            <a href="/register">新規登録</a>
-        @endguest
-    </nav>
-    <hr>
-</header>
+    <!-- メイン -->
+    <main class="main">
+        @yield('content')
+    </main>
 
-<main>
-    @if ($errors->any())
-        <div style="color:red;">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @yield('content')
-</main>
 </body>
 </html>

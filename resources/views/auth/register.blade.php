@@ -1,33 +1,36 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>新規登録</h1>
+<div class="container">
+    <h2>会員登録</h2>
 
-<form action="/register" method="post">
-    @csrf
+    <form method="POST" action="{{ route('register') }}">
+        @csrf
 
-    <div>
-        <label>ユーザー名</label><br>
-        <input type="text" name="name" value="{{ old('name') }}" required>
-    </div>
+        <div class="form-group">
+            <label>ユーザー名</label>
+            <input type="text" name="name" value="{{ old('name') }}" required>
+        </div>
 
-    <div>
-        <label>メールアドレス</label><br>
-        <input type="email" name="email" value="{{ old('email') }}" required>
-    </div>
+        <div class="form-group">
+            <label>メールアドレス</label>
+            <input type="email" name="email" value="{{ old('email') }}" required>
+        </div>
 
-    <div>
-        <label>パスワード</label><br>
-        <input type="password" name="password" required>
-    </div>
+        <div class="form-group">
+            <label>パスワード</label>
+            <input type="password" name="password" required>
+        </div>
 
-    <div>
-        <label>パスワード（確認）</label><br>
-        <input type="password" name="password_confirmation" required>
-    </div>
+        <div class="form-group">
+            <label>パスワード（確認）</label>
+            <input type="password" name="password_confirmation" required>
+        </div>
 
-    <button type="submit">登録</button>
-</form>
+        <button type="submit">登録する</button>
+    </form>
 
-<p><a href="/login">ログインはこちら</a></p>
+    <a href="{{ route('login') }}" class="link">ログインはこちら</a>
+</div>
 @endsection
+
