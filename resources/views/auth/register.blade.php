@@ -4,27 +4,40 @@
 <div class="container">
     <h2>会員登録</h2>
 
-    <form method="POST" action="{{ route('register') }}">
+<form method="POST" action="/register">
+
         @csrf
 
         <div class="form-group">
             <label>ユーザー名</label>
-            <input type="text" name="name" value="{{ old('name') }}" required>
+            <input type="text" name="name" value="{{ old('name') }}">
+            @error('name')
+                <div class="error">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="form-group">
             <label>メールアドレス</label>
-            <input type="email" name="email" value="{{ old('email') }}" required>
+            <input type="email" name="email" value="{{ old('email') }}">
+            @error('email')
+                <div class="error">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="form-group">
             <label>パスワード</label>
-            <input type="password" name="password" required>
+            <input type="password" name="password">
+            @error('password')
+                <div class="error">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="form-group">
             <label>パスワード（確認）</label>
-            <input type="password" name="password_confirmation" required>
+            <input type="password" name="password_confirmation">
+            @error('password_confirmation')
+                <div class="error">{{ $message }}</div>
+            @enderror
         </div>
 
         <button type="submit">登録する</button>

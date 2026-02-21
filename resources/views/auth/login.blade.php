@@ -1,38 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>ログイン</title>
+@extends('layouts.app')
 
-    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
-</head>
-<body>
-
-<div class="header">
-    <h1>COACHTECH</h1>
-</div>
+@section('content')
 
 <div class="container">
     <h2>ログイン</h2>
 
-    <form method="POST" action="/login">
+    <form method="POST" action="{{ route('login') }}">
         @csrf
 
         <div class="form-group">
-            <label>メールアドレス</label>
-            <input type="email" name="email">
+            <label for="email">メールアドレス</label>
+            <input 
+                type="email" 
+                id="email"
+                name="email" 
+                value="{{ old('email') }}"
+            >
+            @error('email')
+                <div class="error">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="form-group">
-            <label>パスワード</label>
-            <input type="password" name="password">
+            <label for="password">パスワード</label>
+            <input 
+                type="password" 
+                id="password"
+                name="password"
+            >
+            @error('password')
+                <div class="error">{{ $message }}</div>
+            @enderror
         </div>
 
         <button type="submit">ログインする</button>
     </form>
 
-    <a href="/register" class="link">会員登録はこちら</a>
+    <div class="link-area">
+        <a href="/register" class="link">
+            会員登録はこちら
+        </a>
+    </div>
 </div>
 
-</body>
-</html>
+@endsection
+

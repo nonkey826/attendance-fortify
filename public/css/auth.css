@@ -1,3 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
 /* =========================
    Base
 ========================= */
@@ -5,7 +12,7 @@
 body {
     margin: 0;
     background: #fff;
-    font-family: sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 /* =========================
@@ -13,12 +20,31 @@ body {
 ========================= */
 
 .header {
-    background-color: #000;
-    color: #fff;
+    width: 100%;
     height: 80px;
+    background: #000;
     display: flex;
     align-items: center;
-    padding-left: 40px;
+    padding: 0 40px;
+    box-sizing: border-box;
+}
+
+.nav {
+    margin-left: auto;
+    /* ← これが右寄せの鍵 */
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav a,
+.logout-btn {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .logo {
@@ -77,7 +103,7 @@ body {
    Button
 ========================= */
 
-button {
+.container button {
     width: 100%;
     height: 60px;
     background-color: #000;
@@ -87,7 +113,6 @@ button {
     font-weight: 700;
     cursor: pointer;
     margin-top: 105px;
-    /* Figmaで測った値 */
 }
 
 /* =========================
@@ -102,14 +127,53 @@ button {
     font-size: 20px;
     color: #0073CC;
     text-decoration: none;
-    font-weight: 400;
 }
 
 /* =========================
-   Responsive
+   Tablet（768–850px）
 ========================= */
 
-@media (max-width: 768px) {
+@media screen and (min-width: 768px) and (max-width: 850px) {
+
+    .container {
+        width: 90%;
+    }
+
+    .container h2 {
+        font-size: 30px;
+        margin-top: 150px;
+    }
+
+    .form-group label {
+        font-size: 20px;
+    }
+
+    .form-group input {
+        height: 55px;
+    }
+
+    button {
+        height: 55px;
+        font-size: 20px;
+    }
+}
+
+/* =========================
+   PC（1400–1540px）
+========================= */
+
+@media screen and (min-width: 1400px) and (max-width: 1540px) {
+
+    .container {
+        width: 680px;
+    }
+}
+
+/* =========================
+   Mobile（〜767px）
+========================= */
+
+@media screen and (max-width: 767px) {
 
     .container {
         padding: 0 20px;
@@ -132,4 +196,299 @@ button {
         height: 50px;
         font-size: 18px;
     }
+}
+
+/* モバイル時にナビが折り返して崩れるため縦並びに調整 */
+
+    @media screen and (max-width: 767px) {
+    
+            .nav {
+                gap: 12px;
+                align-items: center;
+                flex-wrap: nowrap;
+            }
+    
+        }
+
+
+/* ログアウトボタン */
+.logout-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+}
+
+.logout-btn:focus {
+    outline: none;
+}
+
+/* ===== 打刻画面専用レイアウト ===== */
+
+    .attendance-page {
+            background-color: #F0EFF2;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+.attendance-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: calc(100vh - 80px);
+    text-align: center;
+}
+
+.status-badge {
+    background-color: #C8C8C8;
+    padding: 9px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #696969;
+}
+
+.date {
+    font-size: 40px;
+    margin-bottom: 10px;
+    font-weight: 400;
+
+}
+
+.time {
+    font-size: 80px;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+.message {
+    font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        line-height: 100%;
+        letter-spacing: 0.15em;
+}
+.button-area {
+    display: flex;
+    gap: 60px;
+}
+
+.btn-primary {
+    width: 221px;
+    height: 77px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 20px;
+    cursor: pointer;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.btn-secondary {
+    width: 221px;
+    height: 77px;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    font-size: 32px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.attendance-wrapper {
+    width: 100%;
+}
+
+@media screen and (min-width: 1400px) and (max-width: 1540px) {
+
+    .attendance-wrapper {
+        max-width: 900px;
+    }
+
+    .time {
+        font-size: 90px;
+    }
+
+    .button-area {
+        gap: 80px;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 850px) {
+
+    .attendance-wrapper {
+        padding: 0 40px;
+    }
+
+    .time {
+        font-size: 60px;
+    }
+
+    .date {
+        font-size: 28px;
+    }
+
+    .button-area {
+        gap: 30px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 180px;
+        height: 65px;
+        font-size: 24px;
+    }
+}
+
+/* ===== 勤怠一覧専用 ===== */
+
+/* ===== 一覧ページ全体 ===== */
+
+.attendance-list-page {
+    background-color: #F0EFF2;
+    min-height: calc(100vh - 80px);
+    padding: 60px 0;
+    color: #737373;
+    font-family: 'Inter';
+    letter-spacing: 0.15em;
+    font-weight: 700;
+}
+
+.attendance-container {
+    width: 900px;
+    margin: 0 auto;
+}
+
+
+/* タイトル */
+.page-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #000;
+}
+
+.page-title::before {
+    content: "";
+    width: 4px;
+    height: 28px;
+    background-color: #000;
+    display: inline-block;
+}
+
+/* 月バー */
+/* ===== 月ナビ修正 ===== */
+
+.month-card {
+    background: #fff;
+    padding: 18px 30px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+    color: #737373;
+}
+
+.calendar-icon {
+    width: 25px;
+    height: 25px;
+    opacity: 1;
+    /* 矢印と違って薄くしない */
+}
+
+.month-label {
+    font-weight: 700;
+    font-size: 20px;
+    /* Figma寄せ */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0;
+    color: #000;
+}
+
+
+
+.arrow-left,
+.arrow-right {
+    width: 20px;
+    height: 15px;
+    opacity: 0.3;
+}
+
+.arrow-right {
+    transform: rotate(180deg);
+}
+
+.month-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #737373;
+    font-weight: 400;
+}
+
+/* テーブルカード */
+.table-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.attendance-table th {
+    background-color: #fff;
+    padding: 15px;
+    border-bottom: 3px solid #E1E1E1;
+}
+
+.attendance-table td {
+    padding: 15px;
+    text-align: center;
+    border-top: 2px solid #E1E1E1;
+}
+
+.attendance-table th,
+.attendance-table td {
+    color: #737373;
+}
+
+/* ===== 勤怠一覧：詳細リンク（UI寄せ） ===== */
+.attendance-table td a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    /* 正解UIは太め */
+}
+
+.attendance-table td a:visited {
+    color: #000;
+    /* 訪問済みの紫化を防ぐ */
+}
+
+.attendance-table td a:hover {
+    opacity: 0.6;
+    /* うっすら変化だけ */
+    text-decoration: none;
 }

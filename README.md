@@ -1,59 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 勤怠管理アプリ
 
-## About Laravel
+## 概要
+本アプリは、出勤・退勤・休憩管理を行う勤怠管理アプリです。  
+ユーザーは会員登録後、メール認証を完了しないとログインおよび勤怠機能を利用できません。
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 使用技術
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Laravel 12
+- PHP 8.4
+- MySQL 8.0
+- Docker
+- Nginx
+- Fortify（認証機能）
+- Mailhog（開発用メール確認ツール）
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 環境構築
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Docker起動
 
-## Laravel Sponsors
+```bash
+docker compose up -d
+````
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. PHPコンテナへ入る
 
-### Premium Partners
+```bash
+docker compose exec php bash
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 3. 依存関係インストール
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. マイグレーション実行
 
-## Code of Conduct
+```bash
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## アクセスURL
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+* アプリ: [http://localhost](http://localhost)
+* Mailhog: [http://localhost:8025](http://localhost:8025)
+* phpMyAdmin: [http://localhost:8085](http://localhost:8085)
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## メール認証機能
+
+### 実装内容
+
+* 新規会員登録時に認証メールを送信
+* メール未認証ユーザーはログイン後もアプリ機能を利用不可
+* `verified` ミドルウェアにより制御
+* `MustVerifyEmail` を Userモデルに実装
+* `email_verified_at` カラムにより認証状態を管理
+
+### 開発環境メール確認方法
+
+1. [http://localhost:8025](http://localhost:8025) にアクセス
+2. 受信メール一覧から認証メールを選択
+3. メール内の認証リンクをクリック
+4. 認証完了後、勤怠画面へ遷移
+
+---
+
+## データベース設計
+
+### usersテーブル
+
+| カラム名              | 型                    |
+| ----------------- | -------------------- |
+| id                | unsigned bigint      |
+| name              | varchar(255)         |
+| email             | varchar(255)         |
+| password          | varchar(255)         |
+| role              | varchar(50)          |
+| email_verified_at | timestamp (nullable) |
+| created_at        | timestamp            |
+| updated_at        | timestamp            |
+
+---
+
+## 機能一覧
+
+* 会員登録
+* ログイン / ログアウト
+* メール認証機能
+* 出勤処理
+* 退勤処理
+* 休憩開始 / 終了
+* 管理者判定機能
+
+---
+
+## 補足
+
+本アプリでは開発環境にMailhogを使用しています。
+本番環境ではSMTPサーバー（例：SendGrid等）へ切り替えることでメール送信が可能です。
+

@@ -1,38 +1,66 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>勤怠一覧</title>
-</head>
-<body>
+@extends('layouts.app')
 
-<h1>勤怠一覧（{{ $month }}）</h1>
+@section('content')
+<div class="attendance-list-page">
 
-<table border="1" cellpadding="5">
-    <tr>
-        <th>日付</th>
-        <th>出勤</th>
-        <th>退勤</th>
-        <th>ステータス</th>
-    </tr>
+    <div class="attendance-container">
 
-    @foreach($data as $row)
-        <tr>
-            <td>{{ $row['date']->format('m/d') }}</td>
+        <h2 class="page-title">勤怠一覧</h2>
 
-            @if($row['attendance'])
-                <td>{{ $row['attendance']->clock_in_time }}</td>
-                <td>{{ $row['attendance']->clock_out_time }}</td>
-                <td>{{ $row['attendance']->status }}</td>
-            @else
-                <td>-</td>
-                <td>-</td>
-                <td>未出勤</td>
-            @endif
-        </tr>
-    @endforeach
+        {{-- 月ナビ --}}
+        <div class="month-card">
 
-</table>
+    <a class="month-link"
+       href="{{ route('attendance.list', ['month' => \Carbon\Carbon::parse($month)->subMonth()->format('Y-m')]) }}">
+        <img src="{{ asset('images/arrow.png') }}" class="arrow-left">
+        前月
+    </a>
 
-</body>
-</html>
+    <div class="month-label">
+    <img src="{{ asset('images/month.png') }}" class="calendar-icon">
+    {{ \Carbon\Carbon::parse($month)->format('Y/m') }}
+</div>
+
+    <a class="month-link"
+       href="{{ route('attendance.list', ['month' => \Carbon\Carbon::parse($month)->addMonth()->format('Y-m')]) }}">
+        翌月
+        <img src="{{ asset('images/arrow.png') }}" class="arrow-right">
+    </a>
+
+</div>
+
+        {{-- テーブルカード --}}
+        <div class="table-card">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>出勤</th>
+                        <th>退勤</th>
+                        <th>休憩</th>
+                        <th>合計</th>
+                        <th>詳細</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($data as $row)
+                        <tr>
+                            <td>{{ $row['date']->isoFormat('MM/DD(ddd)') }}</td>
+                            <td>{{ $row['clock_in'] ?? '' }}</td>
+                            <td>{{ $row['clock_out'] ?? '' }}</td>
+                            <td>{{ $row['break'] ?? '' }}</td>
+                            <td>{{ $row['total'] ?? '' }}</td>
+                            <td>
+                                @if($row['attendance'])
+                                    <a href="#">詳細</a>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+@endsection
