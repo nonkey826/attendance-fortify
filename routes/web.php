@@ -1,14 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+
 use App\Models\User;
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceListController;
+use App\Http\Controllers\AttendanceCorrectionRequestController;
+use App\Http\Requests\AdminLoginRequest;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Controllers\Admin\AdminAttendanceController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -16,47 +23,107 @@ use App\Models\User;
 |--------------------------------------------------------------------------
 */
 
-// ログイン画面
-Route::get('/login', function () {
-    return view('auth.login');
-})->middleware('guest')->name('login');
+Route::middleware('guest')->group(function () {
 
-// 会員登録画面
-Route::get('/register', function () {
-    return view('auth.register');
-})->middleware('guest')->name('register');
+    // 一般ログイン画面
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
 
-// ログイン処理
-Route::post('/login', function (LoginRequest $request) {
+    // 管理者ログイン画面
+    Route::get('/admin/login', function () {
+        return view('admin.login');
+    })->name('admin.login');
 
-    $credentials = $request->only('email', 'password');
+    Route::redirect('/login/admin', '/admin/login')->middleware('guest');
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
+    // 会員登録画面（一般ユーザー）
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 一般ユーザーログイン処理
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post('/login', function (LoginRequest $request) {
+
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('attendance.index');
+        }
+
+        throw ValidationException::withMessages([
+            'email' => ['ログイン情報が登録されていません'],
+        ]);
+
+    })->name('login.process');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 管理者ログイン処理
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post('/admin/login', function (AdminLoginRequest $request) {
+
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+
+            $request->session()->regenerate();
+
+            // role が admin 以外ならログアウト
+            if (auth()->user()->role !== 'admin') {
+
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'ログイン情報が登録されていません',
+                ]);
+            }
+
+            // 管理者トップへ
+            return redirect()->route('admin.attendance.list');
+        }
+
+        return back()->withErrors([
+            'email' => 'ログイン情報が登録されていません',
+        ]);
+
+    })->name('admin.login.process');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 一般ユーザー登録処理
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post('/register', function (RegisterRequest $request) {
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => 'user', // ← 追加（超重要）
+        ]);
+
+        Auth::login($user);
+
         return redirect()->route('attendance.index');
-    }
 
-    throw ValidationException::withMessages([
-        'email' => ['ログイン情報が登録されていません'],
-    ]);
+    })->name('register.process');
 
-})->middleware('guest')->name('login.process');
-
-// 会員登録処理
-Route::post('/register', function (RegisterRequest $request) {
-
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-    ]);
-
-    Auth::login($user);
-
-    return redirect()->route('attendance.index');
-
-})->middleware('guest')->name('register.process');
-
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -67,38 +134,44 @@ Route::post('/register', function (RegisterRequest $request) {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // トップ
-    Route::get('/', [AuthController::class, 'index'])
-        ->name('home');
+    Route::get('/', [AuthController::class, 'index'])->name('home');
+
+    // 打刻画面
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+
+    // 勤怠一覧（月別）
+    Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');
+
+    // 出勤
+    Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('attendance.clockIn');
+
+    // 退勤
+    Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('attendance.clockOut');
+
+    // 休憩開始
+    Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart'])->name('attendance.breakStart');
+
+    // 休憩終了
+    Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])->name('attendance.breakEnd');
+
+    // 勤怠詳細（仕様書どおり）
+    Route::get('/attendance/detail/{id}', [AttendanceListController::class, 'show'])
+        ->name('attendance.detail');
 
     /*
     |--------------------------------------------------------------------------
-    | 勤怠登録画面
+    | 修正申請（一般ユーザー）
+    | ※仕様書の「申請一覧」「承認」パスに合わせて prefix を統一
     |--------------------------------------------------------------------------
     */
 
-    // 打刻画面
-    Route::get('/attendance', [AttendanceController::class, 'index'])
-        ->name('attendance.index');
+    // 申請一覧（仕様書）
+    Route::get('/stamp_correction_request/list', [AttendanceCorrectionRequestController::class, 'index'])
+        ->name('stamp_correction_request.list');
 
-    // 月別一覧
-    Route::get('/attendance/list', [AttendanceController::class, 'list'])
-        ->name('attendance.list');
-
-    // 出勤
-    Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])
-        ->name('attendance.clockIn');
-
-    // 退勤
-    Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])
-        ->name('attendance.clockOut');
-
-    // 休憩開始
-    Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart'])
-        ->name('attendance.breakStart');
-
-    // 休憩終了
-    Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])
-        ->name('attendance.breakEnd');
+    // 修正申請送信（詳細画面の「修正」ボタン用）
+    Route::post('/stamp_correction_request/{attendance}', [AttendanceCorrectionRequestController::class, 'store'])
+        ->name('stamp_correction_request.store');
 });
 
 
@@ -124,15 +197,30 @@ Route::post('/logout', function () {
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    Route::get('/admin/attendance/list', function () {
-        return 'admin attendance list';
-    })->name('admin.attendance.list');
+    Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'index'])
+        ->name('admin.attendance.list');
 
-    Route::get('/admin/attendance/{id}', function ($id) {
-        return "admin attendance {$id}";
-    })->name('admin.attendance.detail');
+    Route::get('/admin/attendance/{id}', [AdminAttendanceController::class, 'show'])
+        ->name('admin.attendance.detail');
 
+    Route::get('/admin/attendance/staff/{user}', [AdminAttendanceController::class, 'staffMonthly'])
+        ->name('admin.attendance.staff.monthly');
+
+    Route::get('/admin/staff/list', [App\Http\Controllers\Admin\AdminStaffController::class, 'index'])
+        ->name('admin.staff.list');
 });
 
+    // 仕様書には admin 側も載ってるが中身は未実装でOK
+    // Route::get('/admin/attendance/list', function () {
+    //     return 'admin attendance list';
+    // })->name('admin.attendance.list');
 
+    // Route::get('/admin/attendance/{id}', function ($id) {
+    //     return "admin attendance {$id}";
+    // })->name('admin.attendance.detail');
 
+    // （将来）承認ルート：仕様書の表に合わせるならこれ
+//     Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', function () {
+//         return 'approve';
+//     })->name('stamp_correction_request.approve');
+//

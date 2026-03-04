@@ -22,13 +22,24 @@ class Attendance extends Model
         return $this->belongsTo(User::class);
     }
 
+    // 既存で breaks() を使っているなら残す
     public function breaks(): HasMany
     {
         return $this->hasMany(BreakTime::class);
     }
 
-    public function correctionRequests(): HasMany
+    // 今回の実装では breakTimes() を使う（with('breakTimes')）
+    public function breakTimes(): HasMany
     {
-        return $this->hasMany(AttendanceCorrectionRequest::class);
+        return $this->hasMany(BreakTime::class);
     }
+
+    // 今回使う修正申請
+    public function changeRequests(): HasMany
+    {
+        return $this->hasMany(\App\Models\AttendanceChangeRequest::class);
+    }
+
+    
 }
+

@@ -1,0 +1,111 @@
+/* ===============================
+   申請一覧画面（一般ユーザー）
+   Figma寄せ：幅900 / 枠#E1E1E1 / 角丸10 / padding16
+================================= */
+
+.request-page {
+    background: #F0EFF2;
+    min-height: calc(100vh - 80px);
+    padding-top: 120px;
+}
+
+.request-container {
+    width: 900px;
+    margin: 0 auto;
+}
+
+.request-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #000;
+}
+
+.request-title::before {
+    content: "";
+    width: 4px;
+    height: 20px;
+    background: #000;
+    display: inline-block;
+}
+
+.request-tabs {
+    display: flex;
+    gap: 106px;
+    margin-bottom: 45px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 8px;
+    padding-left: 40px;
+}
+
+.request-tabs .tab {
+    font-size: 14px;
+    cursor: default;
+    color: #000;
+}
+
+.request-tabs .tab.active {
+    font-weight: 700;
+}
+
+/* 外枠（Figma: #E1E1E1 / radius 10 / padding 16） */
+.request-table-wrapper {
+    background: #fff;
+    border: 1px solid #fff;
+    border-radius: 10px;
+
+}
+
+/* テーブル */
+.request-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* 表の共通（Figma: Inter / 700 / 16px / #737373 / letter-spacing 15%） */
+.request-table th,
+.request-table td {
+    padding: 14px 37px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #737373;
+    letter-spacing: 0.15em;
+    line-height: 1;
+    text-align: left;
+    border-bottom: 1px solid #E1E1E1;
+}
+
+/* ヘッダー下だけ太線（Figma: 3px） */
+.request-table thead th {
+    border-bottom: 2px solid #E1E1E1;
+}
+
+/* 最終行の下線は消す */
+.request-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 「詳細」だけ黒で強調（Figmaの見た目） */
+.request-table td:last-child,
+.request-table td:last-child .detail-link {
+    color: #000;
+    letter-spacing: 0;
+    font-weight: 700;
+}
+
+/* 詳細リンク */
+.detail-link {
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+}
+
+/* PC（1400-1540px）でも崩れない（固定900px中央） */
+@media screen and (min-width: 1400px) and (max-width: 1540px) {
+    .request-container {
+        width: 900px;
+    }
+}

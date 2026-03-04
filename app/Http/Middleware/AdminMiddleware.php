@@ -10,7 +10,12 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        // 未ログインは auth ミドルウェアに任せる（ここでは判定しない）
+        if (!auth()->check()) {
+            return redirect()->route('admin.login');
+        }
+
+        if (auth()->user()->role !== 'admin') {
             abort(403);
         }
 

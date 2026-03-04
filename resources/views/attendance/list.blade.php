@@ -51,10 +51,12 @@
                             <td>{{ $row['break'] ?? '' }}</td>
                             <td>{{ $row['total'] ?? '' }}</td>
                             <td>
-                                @if($row['attendance'])
-                                    <a href="#">詳細</a>
-                                @endif
-                            </td>
+    @if($row['attendance'])
+        <a href="{{ route('attendance.detail', $row['attendance']->id) }}">
+            詳細
+        </a>
+    @endif
+</td>
                         </tr>
                     @endforeach
                 </tbody>
