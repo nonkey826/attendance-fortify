@@ -14,17 +14,20 @@ class StoreAttendanceCorrectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'requested_work_date'      => ['nullable', 'date'],
-            'requested_clock_in_time'  => ['nullable', 'date_format:H:i'],
-            'requested_clock_out_time' => ['nullable', 'date_format:H:i'],
-            'requested_note'           => ['required', 'string', 'max:2000'],
+        'requested_work_date'      => ['nullable', 'date'],
+        'requested_clock_in_time'  => ['nullable', 'date_format:H:i'],
+        'requested_clock_out_time' => ['nullable', 'date_format:H:i'],
 
-            'breaks'         => ['nullable', 'array'],
-            'breaks.*.start' => ['nullable', 'date_format:H:i'],
-            'breaks.*.end'   => ['nullable', 'date_format:H:i'],
+        // ★ここに追加（休憩：単発）
+        'requested_break_start_time' => ['nullable', 'date_format:H:i'],
+        'requested_break_end_time'   => ['nullable', 'date_format:H:i'],
 
+        'requested_note'           => ['required', 'string', 'max:2000'],
 
-        ];
+        'breaks'         => ['nullable', 'array'],
+        'breaks.*.start' => ['nullable', 'date_format:H:i'],
+        'breaks.*.end'   => ['nullable', 'date_format:H:i'],
+    ];
     }
 
     public function messages(): array

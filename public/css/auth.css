@@ -384,16 +384,17 @@ body {
     /* 少し広げる */
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     color: #000;
 }
 
 .page-title::before {
     content: "";
-    width: 4px;
-    height: 28px;
+    width: 8px;
+    height: 35px;
     background-color: #000;
     display: inline-block;
+    margin-right: 10px;
 }
 
 

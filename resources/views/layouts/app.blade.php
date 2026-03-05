@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COACHTECH</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     <link rel="stylesheet" href="{{ asset('css/request.css') }}">
     <link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}?v={{ time() }}">
 </head>
 <body>
 

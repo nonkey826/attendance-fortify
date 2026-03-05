@@ -11,18 +11,19 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceListController;
 use App\Http\Controllers\AttendanceCorrectionRequestController;
+
 use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Http\Controllers\Admin\AdminAttendanceController;
 
+use App\Http\Controllers\Admin\AdminAttendanceController;
+use App\Http\Controllers\Admin\AdminStaffController;
 
 /*
 |--------------------------------------------------------------------------
 | ゲスト用ルート
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('guest')->group(function () {
 
     // 一般ログイン画面
@@ -42,13 +43,11 @@ Route::middleware('guest')->group(function () {
         return view('auth.register');
     })->name('register');
 
-
     /*
     |--------------------------------------------------------------------------
     | 一般ユーザーログイン処理
     |--------------------------------------------------------------------------
     */
-
     Route::post('/login', function (LoginRequest $request) {
 
         $credentials = $request->only('email', 'password');
@@ -64,13 +63,11 @@ Route::middleware('guest')->group(function () {
 
     })->name('login.process');
 
-
     /*
     |--------------------------------------------------------------------------
     | 管理者ログイン処理
     |--------------------------------------------------------------------------
     */
-
     Route::post('/admin/login', function (AdminLoginRequest $request) {
 
         $credentials = $request->only('email', 'password');
@@ -101,20 +98,18 @@ Route::middleware('guest')->group(function () {
 
     })->name('admin.login.process');
 
-
     /*
     |--------------------------------------------------------------------------
     | 一般ユーザー登録処理
     |--------------------------------------------------------------------------
     */
-
     Route::post('/register', function (RegisterRequest $request) {
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => 'user', // ← 追加（超重要）
+            'role'     => 'user',
         ]);
 
         Auth::login($user);
@@ -122,15 +117,14 @@ Route::middleware('guest')->group(function () {
         return redirect()->route('attendance.index');
 
     })->name('register.process');
-
 });
+
 
 /*
 |--------------------------------------------------------------------------
 | 認証後ルート（一般ユーザー）
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // トップ
@@ -160,16 +154,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | 修正申請（一般ユーザー）
-    | ※仕様書の「申請一覧」「承認」パスに合わせて prefix を統一
+    | 修正申請（一般ユーザー：送信だけ）
     |--------------------------------------------------------------------------
+    | ※一覧（US014 管理者）は verified で弾かれるので管理者側へ移動
     */
-
-    // 申請一覧（仕様書）
-    Route::get('/stamp_correction_request/list', [AttendanceCorrectionRequestController::class, 'index'])
-        ->name('stamp_correction_request.list');
-
-    // 修正申請送信（詳細画面の「修正」ボタン用）
     Route::post('/stamp_correction_request/{attendance}', [AttendanceCorrectionRequestController::class, 'store'])
         ->name('stamp_correction_request.store');
 });
@@ -177,24 +165,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| ログアウト
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect()->route('login');
-})->middleware('auth')->name('logout');
-
-
-/*
-|--------------------------------------------------------------------------
 | 管理者ルート
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'index'])
@@ -206,21 +179,39 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/attendance/staff/{user}', [AdminAttendanceController::class, 'staffMonthly'])
         ->name('admin.attendance.staff.monthly');
 
-    Route::get('/admin/staff/list', [App\Http\Controllers\Admin\AdminStaffController::class, 'index'])
+    Route::get('/admin/staff/list', [AdminStaffController::class, 'index'])
         ->name('admin.staff.list');
+    
+        Route::post(
+    '/stamp_correction_request/approve/{attendance_correct_request_id}',
+    [AttendanceCorrectionRequestController::class, 'approve']
+)->name('stamp_correction_request.approve');
+    /*
+    |--------------------------------------------------------------------------
+    | 修正申請（管理者：一覧）
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/stamp_correction_request/list', [AttendanceCorrectionRequestController::class, 'index'])
+        ->name('stamp_correction_request.list');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 修正申請（管理者：詳細）
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/stamp_correction_request/{attendance_correct_request}', [AttendanceCorrectionRequestController::class, 'show'])
+        ->name('stamp_correction_request.show');
 });
 
-    // 仕様書には admin 側も載ってるが中身は未実装でOK
-    // Route::get('/admin/attendance/list', function () {
-    //     return 'admin attendance list';
-    // })->name('admin.attendance.list');
 
-    // Route::get('/admin/attendance/{id}', function ($id) {
-    //     return "admin attendance {$id}";
-    // })->name('admin.attendance.detail');
-
-    // （将来）承認ルート：仕様書の表に合わせるならこれ
-//     Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', function () {
-//         return 'approve';
-//     })->name('stamp_correction_request.approve');
-//
+/*
+|--------------------------------------------------------------------------
+| ログアウト
+|--------------------------------------------------------------------------
+*/
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect()->route('login');
+})->middleware('auth')->name('logout');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class AdminAttendanceController extends Controller
 {
@@ -57,12 +58,33 @@ class AdminAttendanceController extends Controller
     }
 
 
-public function staffMonthly(Request $request, $user)
+public function staffMonthly(Request $request, User $user)
 {
-    // まずは遷移確認用（設計書外の集計等はまだしない）
-    return "admin staff monthly attendance user_id={$user}";
-}
+    $monthParam = $request->query('month'); // 例: 2026-03
 
+    try {
+        $currentMonth = $monthParam
+            ? Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth()
+            : now()->startOfMonth();
+    } catch (\Exception $e) {
+        $currentMonth = now()->startOfMonth();
+    }
+
+    $year  = (int) $currentMonth->year;
+    $month = (int) $currentMonth->month;
+
+    $attendances = Attendance::where('user_id', $user->id)
+        ->whereMonth('work_date', $month)
+        ->whereYear('work_date', $year)
+        ->orderBy('work_date')
+        ->get();
+
+    return view('admin.attendance.staff_monthly', [
+        'user' => $user,
+        'currentMonth' => $currentMonth,
+        'attendances' => $attendances,
+    ]);
+}
 
 
 }

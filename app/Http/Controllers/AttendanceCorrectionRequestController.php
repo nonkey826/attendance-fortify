@@ -12,17 +12,25 @@ class AttendanceCorrectionRequestController extends Controller
 {
 
 public function index(Request $request)
-    {
-        $requests = AttendanceCorrectionRequest::query()
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+{
+    $status = $request->query('status', 'pending');
 
-        return view('stamp_correction_request.list', compact('requests'));
+    $query = AttendanceCorrectionRequest::query();
+
+    if ($status === 'approved') {
+        $query->where('status', 'approved');
+    } else {
+        $query->where('status', 'pending');
+        $status = 'pending';
     }
 
+    $requests = $query->orderByDesc('created_at')->get();
 
-
+    return view('stamp_correction_request.list', [
+        'status' => $status,
+        'requests' => $requests,
+    ]);
+}
 
 
 
@@ -58,18 +66,48 @@ public function index(Request $request)
             ->all();
 
         AttendanceCorrectionRequest::create([
-            'attendance_id'            => $attendance->id,
-            'user_id'                  => auth()->id(),
-            'requested_work_date'      => $validated['requested_work_date'] ?? null,
-            'requested_clock_in_time'  => $validated['requested_clock_in_time'] ?? null,
-            'requested_clock_out_time' => $validated['requested_clock_out_time'] ?? null,
-            'requested_breaks'         => $breaks ?: null,
-            'requested_note'           => $validated['requested_note'],
-            'status'                   => 'pending',
-        ]);
+    'attendance_id'            => $attendance->id,
+    'user_id'                  => auth()->id(),
+
+    // 追加：日付
+    'requested_work_date'      => $validated['requested_work_date'] ?? null,
+
+    // 既存：出勤・退勤
+    'requested_clock_in_time'  => $validated['requested_clock_in_time'] ?? null,
+    'requested_clock_out_time' => $validated['requested_clock_out_time'] ?? null,
+
+    // 追加：休憩
+    'requested_break_start_time' => $validated['requested_break_start_time'] ?? null,
+    'requested_break_end_time'   => $validated['requested_break_end_time'] ?? null,
+
+    // 既存：備考
+    'requested_note'           => $validated['requested_note'] ?? null,
+
+    'status'                   => 'pending',
+]);
 
         return redirect()
             ->route('attendance.detail', $attendance->id)
             ->with('status', '修正申請を送信しました（承認待ち）');
     }
+
+    public function show($id)
+{
+    $request = AttendanceCorrectionRequest::with(['user','attendance'])
+        ->findOrFail($id);
+
+    return view('stamp_correction_request.show', compact('request'));
+}
+
+public function approve($attendance_correct_request_id)
+{
+    $req = AttendanceCorrectionRequest::findOrFail($attendance_correct_request_id);
+
+    $req->update(['status' => 'approved']);
+
+    return redirect()
+        ->route('stamp_correction_request.show', $req->id)
+        ->with('status', '承認しました（※勤怠反映は未実装）');
+}
+
 }
