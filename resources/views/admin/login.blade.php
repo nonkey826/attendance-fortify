@@ -29,5 +29,12 @@
 
     <button type="submit">ログイン</button>
 </form>
+
+<div>
+<p>* email：admin@test.com</p>
+<p>* password：admin123</p>
+</div>
+
+
 </div>
 @endsection

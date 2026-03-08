@@ -170,25 +170,59 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 Route::middleware(['auth', 'admin'])->group(function () {
 
+    /*
+    |--------------------------------------------------------------------------
+    | 管理者：勤怠一覧
+    |--------------------------------------------------------------------------
+    */
     Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'index'])
         ->name('admin.attendance.list');
 
+    /*
+    |--------------------------------------------------------------------------
+    | 管理者：勤怠詳細
+    |--------------------------------------------------------------------------
+    */
     Route::get('/admin/attendance/{id}', [AdminAttendanceController::class, 'show'])
         ->name('admin.attendance.detail');
 
+    /*
+    |--------------------------------------------------------------------------
+    | 管理者：勤怠更新（PG09）
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/admin/attendance/{id}', [AdminAttendanceController::class, 'update'])
+        ->name('admin.attendance.update');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 管理者：スタッフ別月次勤怠
+    |--------------------------------------------------------------------------
+    */
     Route::get('/admin/attendance/staff/{user}', [AdminAttendanceController::class, 'staffMonthly'])
         ->name('admin.attendance.staff.monthly');
 
-    Route::get('/admin/staff/list', [AdminStaffController::class, 'index'])
-        ->name('admin.staff.list');
-    
-        Route::post(
-    '/stamp_correction_request/approve/{attendance_correct_request_id}',
-    [AttendanceCorrectionRequestController::class, 'approve']
-)->name('stamp_correction_request.approve');
     /*
     |--------------------------------------------------------------------------
-    | 修正申請（管理者：一覧）
+    | 管理者：スタッフ一覧
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/admin/staff/list', [AdminStaffController::class, 'index'])
+        ->name('admin.staff.list');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 修正申請：承認
+    |--------------------------------------------------------------------------
+    */
+    Route::post(
+        '/stamp_correction_request/approve/{attendance_correct_request_id}',
+        [AttendanceCorrectionRequestController::class, 'approve']
+    )->name('stamp_correction_request.approve');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 修正申請：一覧
     |--------------------------------------------------------------------------
     */
     Route::get('/stamp_correction_request/list', [AttendanceCorrectionRequestController::class, 'index'])
@@ -196,11 +230,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | 修正申請（管理者：詳細）
+    | 修正申請：詳細
     |--------------------------------------------------------------------------
     */
     Route::get('/stamp_correction_request/{attendance_correct_request}', [AttendanceCorrectionRequestController::class, 'show'])
         ->name('stamp_correction_request.show');
+
 });
 
 
