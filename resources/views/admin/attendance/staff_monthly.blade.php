@@ -67,21 +67,66 @@
                 {{ $d->format('m/d') }}({{ $weeks[$d->dayOfWeek] }})
               </td>
 
+              {{-- 出勤 --}}
               <td>
-                {{ $attendance && $attendance->clock_in_time 
-                    ? \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i') 
+                {{ $attendance && $attendance->clock_in_time
+                    ? \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i')
                     : '' }}
               </td>
 
+              {{-- 退勤 --}}
               <td>
-                {{ $attendance && $attendance->clock_out_time 
-                    ? \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i') 
+                {{ $attendance && $attendance->clock_out_time
+                    ? \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i')
                     : '' }}
               </td>
 
-              <td></td>
-              <td></td>
+              {{-- 休憩 --}}
+              <td>
+                @if($attendance)
+                  @php
+                    $breakMinutes = $attendance->breakTimes->sum(function ($b) {
+                        if (!$b->break_start_time || !$b->break_end_time) return 0;
 
+                        return \Carbon\Carbon::parse($b->break_start_time)
+                            ->diffInMinutes(\Carbon\Carbon::parse($b->break_end_time));
+                    });
+                  @endphp
+
+                  @if($breakMinutes > 0)
+                    {{ floor($breakMinutes / 60) }}:{{ str_pad($breakMinutes % 60, 2, '0', STR_PAD_LEFT) }}
+                  @endif
+                @endif
+              </td>
+
+              {{-- 合計勤務 --}}
+              <td>
+                @if($attendance && $attendance->clock_in_time && $attendance->clock_out_time)
+
+                  @php
+                    $workMinutes = \Carbon\Carbon::parse($attendance->clock_in_time)
+                        ->diffInMinutes(\Carbon\Carbon::parse($attendance->clock_out_time));
+
+                    $breakMinutes = $attendance->breakTimes->sum(function ($b) {
+                        if (!$b->break_start_time || !$b->break_end_time) return 0;
+
+                        return \Carbon\Carbon::parse($b->break_start_time)
+                            ->diffInMinutes(\Carbon\Carbon::parse($b->break_end_time));
+                    });
+
+                    $workMinutes -= $breakMinutes;
+
+                    if ($workMinutes < 0) {
+                        $workMinutes = 0;
+                    }
+                  @endphp
+
+                  {{ floor($workMinutes / 60) }}:{{ str_pad($workMinutes % 60, 2, '0', STR_PAD_LEFT) }}
+
+                @endif
+              </td>
+
+              {{-- 詳細 --}}
               <td>
                 @if($attendance)
                   <a href="{{ route('admin.attendance.detail', $attendance->id) }}">詳細</a>

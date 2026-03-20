@@ -1,6 +1,6 @@
 /* ===============================
    申請一覧画面（一般ユーザー）
-   Figma寄せ：幅900 / 枠#E1E1E1 / 角丸10 / padding16
+   Figma寄せ：幅900 / 枠#E1E1E1 / 角丸10
 ================================= */
 
 .request-page {
@@ -9,15 +9,21 @@
     padding-top: 120px;
 }
 
+/* コンテナ */
 .request-container {
-    width: 900px;
+    width: 100%;
+    max-width: 900px;
     margin: 0 auto;
 }
 
+/* タイトル */
+
 .request-title {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 24px;
     font-size: 30px;
     font-weight: 700;
-    margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -32,10 +38,14 @@
     display: inline-block;
 }
 
+/* タブ */
+
 .request-tabs {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 45px;
     display: flex;
     gap: 106px;
-    margin-bottom: 45px;
     border-bottom: 1px solid #000;
     padding-bottom: 8px;
     padding-left: 40px;
@@ -51,21 +61,27 @@
     font-weight: 700;
 }
 
-/* 外枠（Figma: #E1E1E1 / radius 10 / padding 16） */
-.request-table-wrapper {
-    background: #fff;
-    border: 1px solid #fff;
-    border-radius: 10px;
+/* 外枠 */
 
+.request-table-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #E1E1E1;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 /* テーブル */
+
 .request-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-/* 表の共通（Figma: Inter / 700 / 16px / #737373 / letter-spacing 15%） */
+/* 共通セル */
+
 .request-table th,
 .request-table td {
     padding: 14px 37px;
@@ -78,17 +94,20 @@
     border-bottom: 1px solid #E1E1E1;
 }
 
-/* ヘッダー下だけ太線（Figma: 3px） */
+/* ヘッダー */
+
 .request-table thead th {
     border-bottom: 2px solid #E1E1E1;
 }
 
-/* 最終行の下線は消す */
+/* 最終行 */
+
 .request-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* 「詳細」だけ黒で強調（Figmaの見た目） */
+/* 詳細列 */
+
 .request-table td:last-child,
 .request-table td:last-child .detail-link {
     color: #000;
@@ -97,15 +116,89 @@
 }
 
 /* 詳細リンク */
+
 .detail-link {
     font-weight: 700;
     color: #000;
     text-decoration: none;
 }
 
-/* PC（1400-1540px）でも崩れない（固定900px中央） */
-@media screen and (min-width: 1400px) and (max-width: 1540px) {
+.tab-menu {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+/* ===============================
+   Tablet（768–850px）
+================================= */
+
+@media screen and (min-width: 768px) and (max-width: 850px) {
+
     .request-container {
-        width: 900px;
+        width: 94%;
     }
+
+    .request-title {
+        font-size: 24px;
+    }
+
+    .request-tabs {
+        gap: 40px;
+        padding-left: 20px;
+    }
+
+    .request-table th,
+    .request-table td {
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+
+}
+
+/* ===============================
+   Mobile（〜767px）
+================================= */
+
+@media screen and (max-width: 767px) {
+
+    .request-container {
+        width: 92%;
+    }
+
+    .request-title {
+        font-size: 22px;
+    }
+
+    .request-tabs {
+        gap: 24px;
+        padding-left: 10px;
+    }
+
+    .request-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .request-table th,
+    .request-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+    }
+
+}
+
+/* ===============================
+   PC（1400〜1540px）
+   DG02対応
+================================= */
+
+@media screen and (min-width: 1400px) and (max-width: 1540px) {
+
+    .request-container,
+    .request-title,
+    .request-tabs,
+    .request-table-wrapper {
+        max-width: 900px;
+    }
+
 }

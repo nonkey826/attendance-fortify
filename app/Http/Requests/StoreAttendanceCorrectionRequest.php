@@ -18,7 +18,7 @@ class StoreAttendanceCorrectionRequest extends FormRequest
         'requested_clock_in_time'  => ['nullable', 'date_format:H:i'],
         'requested_clock_out_time' => ['nullable', 'date_format:H:i'],
 
-        // ★ここに追加（休憩：単発）
+        // （休憩：単発）
         'requested_break_start_time' => ['nullable', 'date_format:H:i'],
         'requested_break_end_time'   => ['nullable', 'date_format:H:i'],
 
@@ -33,11 +33,16 @@ class StoreAttendanceCorrectionRequest extends FormRequest
     public function messages(): array
 {
     return [
+
         // 出退勤
         'requested_clock_in_time.date_format'  => '出勤時間が不適切な値です',
         'requested_clock_out_time.date_format' => '退勤時間が不適切な値です',
 
-        // 休憩
+        // 単発休憩
+        'requested_break_start_time.date_format' => '休憩時間が不適切な値です',
+        'requested_break_end_time.date_format'   => '休憩時間が不適切な値です',
+
+        // 配列休憩
         'breaks.*.start.date_format' => '休憩時間が不適切な値です',
         'breaks.*.end.date_format'   => '休憩時間が不適切な値です',
 

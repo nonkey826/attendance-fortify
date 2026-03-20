@@ -4,13 +4,11 @@
     box-sizing: border-box;
 }
 
-
 /* =========================
    Base
 ========================= */
 
 body {
-    margin: 0;
     background: #fff;
     font-family: 'Inter', sans-serif;
 }
@@ -26,15 +24,24 @@ body {
     display: flex;
     align-items: center;
     padding: 0 40px;
-    box-sizing: border-box;
+}
+
+.logo {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.logo img {
+    height: 30px;
+    width: auto;
 }
 
 .nav {
     margin-left: auto;
-    /* ← これが右寄せの鍵 */
     display: flex;
-    gap: 30px;
     align-items: center;
+    gap: 30px;
 }
 
 .nav a,
@@ -47,10 +54,12 @@ body {
     cursor: pointer;
 }
 
-.logo {
-    color: #fff;
-    font-size: 24px;
+.logout-btn {
     font-weight: 700;
+}
+
+.logout-btn:focus {
+    outline: none;
 }
 
 /* =========================
@@ -58,7 +67,7 @@ body {
 ========================= */
 
 .container {
-    width: 100%;
+    width: 90%;
     max-width: 680px;
     margin: 0 auto;
 }
@@ -96,8 +105,9 @@ body {
     padding: 0 16px;
     border: 1px solid #000;
     border-radius: 4px;
-    box-sizing: border-box;
 }
+
+
 
 /* =========================
    Button
@@ -106,13 +116,14 @@ body {
 .container button {
     width: 100%;
     height: 60px;
-    background-color: #000;
+    background: #000;
     color: #fff;
     border: none;
     font-size: 24px;
     font-weight: 700;
     cursor: pointer;
     margin-top: 105px;
+    border-radius: 4px;
 }
 
 /* =========================
@@ -130,10 +141,227 @@ body {
 }
 
 /* =========================
-   Tablet（768–850px）
+   打刻画面
 ========================= */
 
-@media screen and (min-width: 768px) and (max-width: 850px) {
+.attendance-page {
+    background-color: #F0EFF2;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.attendance-wrapper {
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+}
+
+.status-badge {
+    background-color: #C8C8C8;
+    padding: 9px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #696969;
+    display: inline-block;
+}
+
+.date {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.time {
+    font-size: 80px;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+.message {
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: 0.15em;
+}
+
+.button-area {
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+    width: 221px;
+    height: 77px;
+    border-radius: 20px;
+    font-size: 32px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #000;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: #000;
+    border: none;
+}
+
+
+.pending-message {
+    color: rgba(255, 0, 0, 0.5);
+    text-align: right;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+/* =========================
+   勤怠一覧
+========================= */
+
+.attendance-list-page {
+    background-color: #F0EFF2;
+    min-height: calc(100vh - 80px);
+    padding: 60px 0;
+}
+
+.attendance-container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 30px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-title::before {
+    content: "";
+    width: 8px;
+    height: 35px;
+    background: #000;
+}
+
+/* =========================
+   月ナビ
+========================= */
+
+.month-card {
+    background: #fff;
+    padding: 18px 30px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.month-label {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.calendar-icon {
+    width: 25px;
+    height: 25px;
+}
+
+.month-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #737373;
+}
+
+.arrow-left,
+.arrow-right {
+    width: 20px;
+    height: 15px;
+    opacity: 0.3;
+}
+
+.arrow-right {
+    transform: rotate(180deg);
+}
+
+/* =========================
+   Tab
+========================= */
+
+.tab-menu {
+    display: flex;
+    gap: 40px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-menu a {
+    text-decoration: none;
+    color: #000;
+}
+
+.tab-menu a.active {
+    font-weight: 700;
+}
+
+/* =========================
+   Table
+========================= */
+
+.table-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.attendance-table th {
+    font-size: 16px;
+    color: #737373;
+    font-weight: 700;
+    padding: 18px 16px;
+    border-bottom: 3px solid #E1E1E1;
+}
+
+.attendance-table td {
+    font-size: 16px;
+    color: #737373;
+    font-weight: 700;
+    padding: 18px 16px;
+    text-align: center;
+    border-top: 2px solid #E1E1E1;
+}
+
+.attendance-table td a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* =========================
+   Tablet
+========================= */
+
+@media screen and (max-width: 850px) {
 
     .container {
         width: 90%;
@@ -152,25 +380,15 @@ body {
         height: 55px;
     }
 
-    button {
+    .container button {
         height: 55px;
         font-size: 20px;
     }
+
 }
 
 /* =========================
-   PC（1400–1540px）
-========================= */
-
-@media screen and (min-width: 1400px) and (max-width: 1540px) {
-
-    .container {
-        width: 680px;
-    }
-}
-
-/* =========================
-   Mobile（〜767px）
+   Mobile
 ========================= */
 
 @media screen and (max-width: 767px) {
@@ -192,366 +410,27 @@ body {
         height: 50px;
     }
 
-    button {
+    .container button {
         height: 50px;
         font-size: 18px;
     }
-}
 
-/* モバイル時にナビが折り返して崩れるため縦並びに調整 */
-
-    @media screen and (max-width: 767px) {
-    
-            .nav {
-                gap: 12px;
-                align-items: center;
-                flex-wrap: nowrap;
-            }
-    
-        }
-
-
-/* ログアウトボタン */
-.logout-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0;
-}
-
-.logout-btn:focus {
-    outline: none;
-}
-
-/* ===== 打刻画面専用レイアウト ===== */
-
-    .attendance-page {
-            background-color: #F0EFF2;
-            min-height: calc(100vh - 80px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-
-.attendance-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    min-height: calc(100vh - 80px);
-    text-align: center;
-}
-
-.status-badge {
-    background-color: #C8C8C8;
-    padding: 9px 20px;
-    border-radius: 20px;
-    font-size: 18px;
-    margin-bottom: 20px;
-    font-weight: 700;
-    color: #696969;
-}
-
-.date {
-    font-size: 40px;
-    margin-bottom: 10px;
-    font-weight: 400;
-
-}
-
-.time {
-    font-size: 80px;
-    font-weight: 700;
-    margin-bottom: 40px;
-}
-
-.message {
-    font-family: 'Inter', sans-serif;
-        font-weight: 700;
-        font-size: 26px;
-        line-height: 100%;
-        letter-spacing: 0.15em;
-}
-.button-area {
-    display: flex;
-    gap: 60px;
-}
-
-.btn-primary {
-    width: 221px;
-    height: 77px;
-    background-color: #000;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    font-size: 20px;
-    cursor: pointer;
-    font-size: 32px;
-    font-weight: 700;
-}
-
-.btn-secondary {
-    width: 221px;
-    height: 77px;
-    background-color: #fff;
-    color: #000;
-    border: none;
-    border-radius: 20px;
-    font-size: 32px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.attendance-wrapper {
-    width: 100%;
-}
-
-@media screen and (min-width: 1400px) and (max-width: 1540px) {
-
-    .attendance-wrapper {
-        max-width: 900px;
+    .nav {
+        gap: 12px;
+        flex-wrap: nowrap;
     }
 
-    .time {
-        font-size: 90px;
-    }
-
-    .button-area {
-        gap: 80px;
-    }
 }
 
-@media screen and (min-width: 768px) and (max-width: 850px) {
-
-    .attendance-wrapper {
-        padding: 0 40px;
-    }
-
-    .time {
-        font-size: 60px;
-    }
-
-    .date {
-        font-size: 28px;
-    }
-
-    .button-area {
-        gap: 30px;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-        width: 180px;
-        height: 65px;
-        font-size: 24px;
-    }
-}
-
-
-
-/* ===== 勤怠一覧専用 ===== */
-
-/* ===== 一覧ページ全体 ===== */
-
-.attendance-list-page {
-    background-color: #F0EFF2;
-    min-height: calc(100vh - 80px);
-    padding: 60px 0;
-    color: #737373;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: 0.15em;
-    font-weight: 700;
-}
-
-/* コンテナ（重複削除・統一） */
-.attendance-container {
-    width: 90%;
-    max-width: 1000px;
-    margin: 40px auto;
-}
-
-
-/* ===== タイトル ===== */
-
-.page-title {
-    font-size: 30px;
-    margin-bottom: 40px;
-    /* 少し広げる */
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #000;
-}
-
-.page-title::before {
-    content: "";
-    width: 8px;
-    height: 35px;
-    background-color: #000;
-    display: inline-block;
-    margin-right: 10px;
-}
-
-
-/* ===== 月ナビ ===== */
-
-.month-card {
-    background: #fff;
-    padding: 18px 30px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-    /* 50 → 40 に微調整 */
-}
-
-.month-label {
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    letter-spacing: 0;
-    color: #000;
-}
-
-.calendar-icon {
-    width: 25px;
-    height: 25px;
-}
-
-.month-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: #737373;
-    font-weight: 400;
-}
-
-.arrow-left,
-.arrow-right {
-    width: 20px;
-    height: 15px;
-    opacity: 0.3;
-}
-
-.arrow-right {
-    transform: rotate(180deg);
-}
-
-
-/* ===== テーブル ===== */
-
-.table-card {
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.attendance-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.attendance-table th {
-    padding: 18px 16px;
-    /* 少し広げる */
-    border-bottom: 3px solid #E1E1E1;
-}
-
-.attendance-table td {
-    padding: 18px 16px;
-    /* 少し広げる */
-    text-align: center;
-    border-top: 2px solid #E1E1E1;
-}
-
-.attendance-table th,
-.attendance-table td {
-    color: #737373;
-}
-
-.attendance-table td a {
-    color: #000;
-    text-decoration: none;
-    font-weight: 700;
-}
-
-.attendance-table td a:hover {
-    opacity: 0.6;
-}
-
-
-/* =====================================================
-   🖥 PC（1400px〜1540px）
-===================================================== */
+/* =========================
+   PC（1400–1540px）
+========================= */
 
 @media screen and (min-width: 1400px) and (max-width: 1540px) {
 
     .attendance-container {
-        max-width: 1100px;
+        max-width: 1000px;
+        margin: 0 auto;
     }
 
-    .attendance-table th,
-    .attendance-table td {
-        font-size: 16px;
-        padding: 20px 18px;
-    }
-
-    .page-title {
-        font-size: 32px;
-    }
 }
-
-
-
-
-/* =====================================================
-   📱 タブレット（768px〜850px）
-===================================================== */
-
-@media screen and (min-width: 768px) and (max-width: 850px) {
-
-    .attendance-container {
-        width: 94%;
-    }
-
-    .month-card {
-        padding: 14px 18px;
-    }
-
-    .month-label {
-        font-size: 18px;
-    }
-
-    .attendance-table th,
-    .attendance-table td {
-        font-size: 14px;
-        padding: 10px 6px;
-    }
-
-    .page-title {
-        font-size: 24px;
-    }
-
-    .table-card {
-        overflow-x: auto;
-    }
-}
- .attendance-detail-page {
-    background: #f5f5f5;
-    min-height: calc(100vh - 60px);
-    padding: 60px 0;
-}
-
-
-/* ===== 勤怠詳細 ===== */
-
-/* ===== 勤怠詳細 ===== */
-

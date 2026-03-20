@@ -4,7 +4,7 @@
 <div class="attendance-page">
 <div class="attendance-wrapper">
 
-    {{-- ステータスバッジ --}}
+    {{-- ステータス --}}
     <div class="status-badge">
         {{ $status }}
     </div>
@@ -15,11 +15,11 @@
     </div>
 
     {{-- 時刻 --}}
-    <div class="time">
+    <div class="time" id="clock">
         {{ $now->format('H:i') }}
     </div>
 
-    {{-- ボタンエリア --}}
+    {{-- ボタン --}}
     <div class="button-area">
 
         @if($status === '勤務外')
@@ -53,7 +53,19 @@
         @endif
 
     </div>
+
 </div>
 </div>
+
+<script>
+function updateClock(){
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = h + ':' + m;
+}
+
+setInterval(updateClock,1000);
+</script>
 
 @endsection

@@ -17,29 +17,27 @@ class Attendance extends Model
         'note',
     ];
 
+    /**
+     * ユーザー
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // 既存で breaks() を使っているなら残す
-    public function breaks(): HasMany
-    {
-        return $this->hasMany(BreakTime::class);
-    }
-
-    // 今回の実装では breakTimes() を使う（with('breakTimes')）
+    /**
+     * 休憩時間
+     */
     public function breakTimes(): HasMany
     {
         return $this->hasMany(BreakTime::class);
     }
 
-    // 今回使う修正申請
-    public function changeRequests(): HasMany
+    /**
+     * 修正申請
+     */
+    public function correctionRequests(): HasMany
     {
-        return $this->hasMany(\App\Models\AttendanceChangeRequest::class);
+        return $this->hasMany(AttendanceCorrectionRequest::class);
     }
-
-    
 }
-

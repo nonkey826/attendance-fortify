@@ -15,11 +15,9 @@ class BreakTime extends Model
         'break_end_time',
     ];
 
-    /**
-     * この休憩が属する勤怠
-     */
     public function attendance(): BelongsTo
     {
         return $this->belongsTo(Attendance::class);
     }
 }
+

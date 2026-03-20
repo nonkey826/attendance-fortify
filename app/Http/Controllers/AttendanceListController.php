@@ -15,8 +15,6 @@ class AttendanceListController extends Controller
     */
     public function index(Request $request)
     {
-        // ※ 勤怠一覧は AttendanceController@list を使っている前提
-        // 設計書上 AttendanceListController@index が必要なら存在だけさせる
         return redirect()->route('attendance.list');
     }
 
@@ -27,21 +25,23 @@ class AttendanceListController extends Controller
     */
     public function show($id)
     {
-        // 自分の勤怠だけ取得（他人のIDを入れても取れない）
-        $attendance = Attendance::with(['user', 'breaks'])
+        $attendance = Attendance::with(['user', 'breakTimes'])
             ->where('id', $id)
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        // 休憩（0,1で取りやすく）
-        $breaks = $attendance->breaks->values();
+        $breaks = $attendance->breakTimes->values();
 
-        // 承認待ち（pending）の修正申請があるか？
         $pendingRequest = AttendanceCorrectionRequest::where('attendance_id', $attendance->id)
             ->where('status', 'pending')
             ->latest()
             ->first();
 
+     
+     
+        
+     
+     
         return view('attendance.detail', compact('attendance', 'breaks', 'pendingRequest'));
     }
 }

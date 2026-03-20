@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceListController;
 use App\Http\Controllers\AttendanceCorrectionRequestController;
+use App\Http\Controllers\AttendanceCorrectionController; // ←追加
 
 use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\LoginRequest;
@@ -26,28 +27,20 @@ use App\Http\Controllers\Admin\AdminStaffController;
 */
 Route::middleware('guest')->group(function () {
 
-    // 一般ログイン画面
     Route::get('/login', function () {
         return view('auth.login');
     })->name('login');
 
-    // 管理者ログイン画面
     Route::get('/admin/login', function () {
         return view('admin.login');
     })->name('admin.login');
 
-    Route::redirect('/login/admin', '/admin/login')->middleware('guest');
+    Route::redirect('/login/admin', '/admin/login');
 
-    // 会員登録画面（一般ユーザー）
     Route::get('/register', function () {
         return view('auth.register');
     })->name('register');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 一般ユーザーログイン処理
-    |--------------------------------------------------------------------------
-    */
     Route::post('/login', function (LoginRequest $request) {
 
         $credentials = $request->only('email', 'password');
@@ -63,11 +56,6 @@ Route::middleware('guest')->group(function () {
 
     })->name('login.process');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 管理者ログイン処理
-    |--------------------------------------------------------------------------
-    */
     Route::post('/admin/login', function (AdminLoginRequest $request) {
 
         $credentials = $request->only('email', 'password');
@@ -76,7 +64,6 @@ Route::middleware('guest')->group(function () {
 
             $request->session()->regenerate();
 
-            // role が admin 以外ならログアウト
             if (auth()->user()->role !== 'admin') {
 
                 Auth::logout();
@@ -88,7 +75,6 @@ Route::middleware('guest')->group(function () {
                 ]);
             }
 
-            // 管理者トップへ
             return redirect()->route('admin.attendance.list');
         }
 
@@ -98,11 +84,6 @@ Route::middleware('guest')->group(function () {
 
     })->name('admin.login.process');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 一般ユーザー登録処理
-    |--------------------------------------------------------------------------
-    */
     Route::post('/register', function (RegisterRequest $request) {
 
         $user = User::create([
@@ -121,44 +102,50 @@ Route::middleware('guest')->group(function () {
 
 
 /*
+/*
 |--------------------------------------------------------------------------
 | 認証後ルート（一般ユーザー）
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // トップ
     Route::get('/', [AuthController::class, 'index'])->name('home');
 
-    // 打刻画面
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
 
-    // 勤怠一覧（月別）
     Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');
 
-    // 出勤
     Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('attendance.clockIn');
 
-    // 退勤
     Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('attendance.clockOut');
 
-    // 休憩開始
     Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart'])->name('attendance.breakStart');
 
-    // 休憩終了
     Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])->name('attendance.breakEnd');
 
-    // 勤怠詳細（仕様書どおり）
+    // 勤怠詳細（一般ユーザー）
     Route::get('/attendance/detail/{id}', [AttendanceListController::class, 'show'])
         ->name('attendance.detail');
 
     /*
     |--------------------------------------------------------------------------
-    | 修正申請（一般ユーザー：送信だけ）
+    | 修正申請（一般ユーザー）
     |--------------------------------------------------------------------------
-    | ※一覧（US014 管理者）は verified で弾かれるので管理者側へ移動
     */
-    Route::post('/stamp_correction_request/{attendance}', [AttendanceCorrectionRequestController::class, 'store'])
+
+    // 申請一覧
+    Route::get('/stamp_correction_request/list',
+        [AttendanceCorrectionRequestController::class, 'index'])
+        ->name('stamp_correction_request.list');
+
+    // 申請詳細（※一般ユーザー用）
+    Route::get('/stamp_correction_request/{attendance_correct_request}',
+        [AttendanceCorrectionRequestController::class, 'show'])
+        ->name('stamp_correction_request.show');
+
+    // 修正申請送信
+    Route::post('/stamp_correction_request/{attendance}',
+        [AttendanceCorrectionController::class, 'store'])
         ->name('stamp_correction_request.store');
 });
 
@@ -170,75 +157,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | 管理者：勤怠一覧
-    |--------------------------------------------------------------------------
-    */
     Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'index'])
         ->name('admin.attendance.list');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 管理者：勤怠詳細
-    |--------------------------------------------------------------------------
-    */
     Route::get('/admin/attendance/{id}', [AdminAttendanceController::class, 'show'])
         ->name('admin.attendance.detail');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 管理者：勤怠更新（PG09）
-    |--------------------------------------------------------------------------
-    */
     Route::post('/admin/attendance/{id}', [AdminAttendanceController::class, 'update'])
         ->name('admin.attendance.update');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 管理者：スタッフ別月次勤怠
-    |--------------------------------------------------------------------------
-    */
     Route::get('/admin/attendance/staff/{user}', [AdminAttendanceController::class, 'staffMonthly'])
         ->name('admin.attendance.staff.monthly');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 管理者：スタッフ一覧
-    |--------------------------------------------------------------------------
-    */
     Route::get('/admin/staff/list', [AdminStaffController::class, 'index'])
         ->name('admin.staff.list');
 
     /*
     |--------------------------------------------------------------------------
-    | 修正申請：承認
+    | 修正申請（管理者）
     |--------------------------------------------------------------------------
     */
-    Route::post(
-        '/stamp_correction_request/approve/{attendance_correct_request_id}',
-        [AttendanceCorrectionRequestController::class, 'approve']
-    )->name('stamp_correction_request.approve');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 修正申請：一覧
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/stamp_correction_request/list', [AttendanceCorrectionRequestController::class, 'index'])
-        ->name('stamp_correction_request.list');
+    // 申請一覧（管理者）
+    Route::get('/admin/stamp_correction_request/list',
+        [AttendanceCorrectionRequestController::class, 'adminIndex'])
+        ->name('admin.stamp_correction_request.list'); 
+    
+    // 申請詳細（承認画面）
+    Route::get('/admin/stamp_correction_request/{attendance_correct_request_id}',
+        [AttendanceCorrectionRequestController::class, 'adminShow'])
+        ->name('admin.stamp_correction_request.detail');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 修正申請：詳細
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/stamp_correction_request/{attendance_correct_request}', [AttendanceCorrectionRequestController::class, 'show'])
-        ->name('stamp_correction_request.show');
-
+    // 承認処理（管理者のみ）
+    Route::post('/admin/stamp_correction_request/approve/{attendance_correct_request_id}',
+        [AttendanceCorrectionRequestController::class, 'approve'])
+        ->name('admin.stamp_correction_request.approve');
 });
-
-
 /*
 |--------------------------------------------------------------------------
 | ログアウト

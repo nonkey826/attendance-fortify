@@ -1,74 +1,104 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="attendance-list-page">
-  <div class="attendance-container">
+<div class="request-detail-page">
+    <div class="request-detail-container">
+        <h1 class="page-title">申請詳細</h1>
 
-    <h1 class="page-title">申請詳細</h1>
+        <div class="detail-card">
+            <table class="detail-table">
+                <tbody>
 
-    <div class="table-card" style="padding: 18px;">
-      <p><strong>状態：</strong>{{ $request->status === 'pending' ? '承認待ち' : '承認済み' }}</p>
-      <p><strong>申請者：</strong>{{ $request->user?->name ?? '-' }}</p>
-      <p><strong>申請日時：</strong>{{ optional($request->created_at)->format('Y/m/d H:i') }}</p>
-      <p><strong>対象日：</strong>
-        @if($request->attendance?->work_date)
-          {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('Y/m/d') }}
-        @else
-          -
-        @endif
-      </p>
-    </div>
+                    <tr>
+                        <th>名前</th>
+                        <td>{{ $correctionRequest->user?->name ?? '-' }}</td>
+                    </tr>
 
-    <div class="table-card" style="margin-top: 18px;">
-      <table class="attendance-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>出勤</th>
-            <th>退勤</th>
-            <th>備考</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>実績</strong></td>
-            <td>
-              {{ $request->attendance?->clock_in_time ? \Carbon\Carbon::parse($request->attendance->clock_in_time)->format('H:i') : '-' }}
-            </td>
-            <td>
-              {{ $request->attendance?->clock_out_time ? \Carbon\Carbon::parse($request->attendance->clock_out_time)->format('H:i') : '-' }}
-            </td>
-            <td>-</td>
-          </tr>
+                    <tr>
+                        <th>日付</th>
+                        <td>
+                            @if($correctionRequest->attendance?->work_date)
+                                @php
+                                    $workDate = \Carbon\Carbon::parse($correctionRequest->attendance->work_date);
+                                @endphp
+                                <div class="date-row">
+                                    <span>{{ $workDate->format('Y年') }}</span>
+                                    <span>{{ $workDate->format('n月j日') }}</span>
+                                </div>
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
 
-          <tr>
-            <td><strong>申請</strong></td>
-            <td>
-              {{ $request->requested_clock_in_time ? \Carbon\Carbon::parse($request->requested_clock_in_time)->format('H:i') : '-' }}
-            </td>
-            <td>
-              {{ $request->requested_clock_out_time ? \Carbon\Carbon::parse($request->requested_clock_out_time)->format('H:i') : '-' }}
-            </td>
-            <td>{{ $request->requested_note ?? '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                    <tr>
+                        <th>出勤・退勤</th>
+                        <td>
+                            <div class="time-range">
+                                <span>
+                                    {{ $correctionRequest->requested_clock_in_time
+                                        ? \Carbon\Carbon::parse($correctionRequest->requested_clock_in_time)->format('H:i')
+                                        : '-' }}
+                                </span>
 
-    {{-- 承認ボタン（承認待ちの時だけ） --}}
-    @if($request->status === 'pending')
-      <div style="margin-top: 24px; display:flex; justify-content:flex-end;">
-        <form method="POST" action="{{ route('stamp_correction_request.approve', ['attendance_correct_request_id' => $request->id]) }}">
-          @csrf
-          <button type="submit" class="btn-black">承認</button>
+                                <span class="time-separator">〜</span>
+
+                                <span>
+                                    {{ $correctionRequest->requested_clock_out_time
+                                        ? \Carbon\Carbon::parse($correctionRequest->requested_clock_out_time)->format('H:i')
+                                        : '-' }}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>休憩</th>
+                        <td>
+                            <div class="time-range">
+                                <span>
+                                    {{ $correctionRequest->requested_break_start_time
+                                        ? \Carbon\Carbon::parse($correctionRequest->requested_break_start_time)->format('H:i')
+                                        : '-' }}
+                                </span>
+
+                                <span class="time-separator">〜</span>
+
+                                <span>
+                                    {{ $correctionRequest->requested_break_end_time
+                                        ? \Carbon\Carbon::parse($correctionRequest->requested_break_end_time)->format('H:i')
+                                        : '-' }}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>備考</th>
+                        <td>{{ $correctionRequest->requested_note ?? '-' }}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+       @if (auth()->user()->role === 'admin' && $correctionRequest->status === 'pending')
+    <div class="detail-actions">
+        <form method="POST" action="{{ route('admin.stamp_correction_request.approve', $correctionRequest->id) }}">
+            @csrf
+            <button type="submit" class="approve-button">承認</button>
         </form>
-      </div>
-    @endif
-
-    <div style="margin-top: 18px;">
-      <a href="{{ route('stamp_correction_request.list', ['status' => 'pending']) }}">← 一覧へ戻る</a>
     </div>
-
-  </div>
+@else
+    <div class="detail-actions">
+        @if($correctionRequest->status === 'pending')
+            <div class="pending-message">*承認待ちのため修正できません</div>
+        @else
+            <div class="approved-label">承認済み</div>
+        @endif
+    </div>
+@endif
+            
+    </div>
 </div>
-@endsection
+@endsection 

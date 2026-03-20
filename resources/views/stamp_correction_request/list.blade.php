@@ -35,7 +35,9 @@
                 <tbody>
                     @forelse ($requests as $request)
                         <tr>
-                            <td>{{ $request->status === 'pending' ? '承認待ち' : '承認済み' }}</td>
+                            <td>
+    {{ $request->status === 'pending' ? '承認待ち' : ($request->status === 'approved' ? '承認済み' : '却下') }}
+</td>
                             <td>{{ $request->user?->name ?? '-' }}</td>
 
                             <td>

@@ -15,18 +15,15 @@ class AdminAttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        // ?date=YYYY-MM-DD があればその日、なければ今日
         $date = $request->query('date')
             ? Carbon::parse($request->query('date'))
             : now();
 
-        // 指定日の勤怠取得
-        $attendances = Attendance::with('user')
+        $attendances = Attendance::with(['user', 'breakTimes'])
             ->whereDate('work_date', $date->toDateString())
             ->orderBy('user_id')
             ->get();
 
-        // Blade用データ整形
         $rows = $attendances->map(function (Attendance $a) {
 
             $clockIn = $a->clock_in_time
@@ -37,13 +34,44 @@ class AdminAttendanceController extends Controller
                 ? Carbon::parse($a->clock_out_time)->format('H:i')
                 : '';
 
+            // 休憩合計
+            $breakMinutes = $a->breakTimes->sum(function ($b) {
+                if (!$b->break_start_time || !$b->break_end_time) {
+                    return 0;
+                }
+
+                return Carbon::parse($b->break_start_time)
+                    ->diffInMinutes(Carbon::parse($b->break_end_time));
+            });
+
+            $break = $breakMinutes
+                ? sprintf('%d:%02d', floor($breakMinutes / 60), $breakMinutes % 60)
+                : '';
+
+            // 勤務合計
+            $total = '';
+
+            if ($a->clock_in_time && $a->clock_out_time) {
+
+                $workMinutes = Carbon::parse($a->clock_in_time)
+                    ->diffInMinutes(Carbon::parse($a->clock_out_time));
+
+                $workMinutes -= $breakMinutes;
+
+                if ($workMinutes < 0) {
+                    $workMinutes = 0;
+                }
+
+                $total = sprintf('%d:%02d', floor($workMinutes / 60), $workMinutes % 60);
+            }
+
             return [
                 'attendance_id' => $a->id,
                 'name' => $a->user?->name ?? '',
                 'clock_in' => $clockIn,
                 'clock_out' => $clockOut,
-                'break' => '',
-                'total' => '',
+                'break' => $break,
+                'total' => $total,
             ];
         })->values();
 
@@ -98,29 +126,31 @@ class AdminAttendanceController extends Controller
     }
 
     /**
-     * 管理者 勤怠更新（PG09）
+     * 管理者 勤怠更新
      */
     public function update(Request $request, $id)
     {
         $attendance = Attendance::with('breakTimes')->findOrFail($id);
 
-        // 勤怠更新
         $attendance->update([
             'clock_in_time' => $request->clock_in_time,
             'clock_out_time' => $request->clock_out_time,
             'note' => $request->note,
         ]);
 
-        // 休憩更新（1件想定）
-        if ($attendance->breakTimes->first()) {
+        $break = $attendance->breakTimes->first();
 
-            $break = $attendance->breakTimes->first();
-
-            $break->update([
-                'break_start_time' => $request->break_start_time,
-                'break_end_time' => $request->break_end_time,
-            ]);
-        }
+if ($break) {
+    $break->update([
+        'break_start_time' => $request->break_start_time,
+        'break_end_time' => $request->break_end_time,
+    ]);
+} else {
+    $attendance->breakTimes()->create([
+        'break_start_time' => $request->break_start_time,
+        'break_end_time' => $request->break_end_time,
+    ]);
+}
 
         return redirect()->route('admin.attendance.detail', $attendance->id);
     }

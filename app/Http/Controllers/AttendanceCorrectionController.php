@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
-use App\Models\AttendanceChangeRequest;
+use App\Models\AttendanceCorrectionRequest;
 use Illuminate\Http\Request;
 
 class AttendanceCorrectionController extends Controller
@@ -16,7 +16,7 @@ class AttendanceCorrectionController extends Controller
         }
 
         // すでに承認待ちがある場合は作らない
-        $existsPending = AttendanceChangeRequest::where('attendance_id', $attendance->id)
+        $existsPending = AttendanceCorrectionRequest::where('attendance_id', $attendance->id)
             ->where('status', 'pending')
             ->exists();
 
@@ -26,13 +26,11 @@ class AttendanceCorrectionController extends Controller
                 ->withErrors(['request' => 'この勤怠はすでに承認待ちの修正申請があります。']);
         }
 
-        // まずは「保存できる」最小バリデーション（備考必須は要件通り）
+        // バリデーション
         $validated = $request->validate([
             'requested_clock_in_time'  => ['required'],
             'requested_clock_out_time' => ['required'],
             'requested_note'           => ['required', 'max:2000'],
-
-            // 休憩（配列で受け取る：breaks[0][start] 等）
             'breaks' => ['nullable', 'array'],
             'breaks.*.start' => ['nullable'],
             'breaks.*.end' => ['nullable'],
@@ -42,28 +40,31 @@ class AttendanceCorrectionController extends Controller
             'requested_note.required'           => '備考を記入してください',
         ]);
 
-        // 休憩をJSON保存用に整形（空行は除外）
+        // 休憩整形
         $breaks = collect($validated['breaks'] ?? [])
-            ->map(fn ($b) => [
-                'start' => $b['start'] ?? null,
-                'end'   => $b['end'] ?? null,
-            ])
-            ->filter(fn ($b) => !empty($b['start']) || !empty($b['end']))
-            ->values()
-            ->all();
+    ->map(fn ($b) => [
+        'start' => $b['start'] ?? null,
+        'end'   => $b['end'] ?? null,
+    ])
+    ->filter(fn ($b) => $b['start'] || $b['end'])
+    ->values()
+    ->toJson();
 
-        AttendanceChangeRequest::create([
-            'attendance_id' => $attendance->id,
-            'user_id'       => auth()->id(),
+        // 保存
+        AttendanceCorrectionRequest::create([
+    'attendance_id' => $attendance->id,
+    'user_id'       => auth()->id(),
 
-            'requested_work_date' => $attendance->work_date, // 今は画面に日付入力がないので現値で埋める
-            'requested_clock_in_time'  => $validated['requested_clock_in_time'],
-            'requested_clock_out_time' => $validated['requested_clock_out_time'],
-            'requested_breaks' => $breaks ?: null,
-            'requested_note'   => $validated['requested_note'],
+    'requested_work_date'      => $attendance->work_date,
+    'requested_clock_in_time'  => $validated['requested_clock_in_time'],
+    'requested_clock_out_time' => $validated['requested_clock_out_time'],
 
-            'status' => 'pending',
-        ]);
+    'requested_break_start_time' => $validated['breaks'][0]['start'] ?? null,
+    'requested_break_end_time'   => $validated['breaks'][0]['end'] ?? null,
+
+    'requested_note' => $validated['requested_note'],
+    'status' => 'pending',
+]);
 
         return redirect()
             ->route('attendance.detail', ['id' => $attendance->id])

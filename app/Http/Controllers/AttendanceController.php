@@ -30,6 +30,7 @@ class AttendanceController extends Controller
         $status = '勤務外';
 
         if ($attendance) {
+
             $activeBreak = BreakTime::where('attendance_id', $attendance->id)
                 ->whereNull('break_end_time')
                 ->first();
@@ -115,98 +116,99 @@ class AttendanceController extends Controller
     | 勤怠一覧（月表示）
     |--------------------------------------------------------------------------
     */
-   public function list(Request $request)
-{
-    $month = $request->query('month', now()->format('Y-m'));
+    public function list(Request $request)
+    {
+        $month = $request->query('month', now()->format('Y-m'));
 
-    $start = Carbon::parse($month . '-01')->startOfMonth();
-    $end   = Carbon::parse($month . '-01')->endOfMonth();
+        $start = Carbon::parse($month . '-01')->startOfMonth();
+        $end   = Carbon::parse($month . '-01')->endOfMonth();
 
-    $period = CarbonPeriod::create($start, $end);
+        $period = CarbonPeriod::create($start, $end);
 
-    $attendances = Attendance::with('breaks')
-        ->where('user_id', auth()->id())
-        ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
-        ->get();
+        $attendances = Attendance::with('breakTimes')
+            ->where('user_id', auth()->id())
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->get();
 
-    $data = [];
+        $data = [];
 
-    foreach ($period as $date) {
+        foreach ($period as $date) {
 
-        $dateString = $date->toDateString();
-        $attendance = $attendances->firstWhere('work_date', $dateString);
+            $dateString = $date->toDateString();
+            $attendance = $attendances->firstWhere('work_date', $dateString);
 
-        $clockIn    = '';
-        $clockOut   = '';
-        $breakTotal = '';
-        $workTotal  = '';
+            $clockIn    = '';
+            $clockOut   = '';
+            $breakTotal = '';
+            $workTotal  = '';
 
-        if ($attendance) {
+            if ($attendance) {
 
-            if ($attendance->clock_in_time) {
-                $clockIn = Carbon::parse($attendance->clock_in_time)->format('H:i');
-            }
+                if ($attendance->clock_in_time) {
+                    $clockIn = Carbon::parse($attendance->clock_in_time)->format('H:i');
+                }
 
-            if ($attendance->clock_out_time) {
-                $clockOut = Carbon::parse($attendance->clock_out_time)->format('H:i');
-            }
+                if ($attendance->clock_out_time) {
+                    $clockOut = Carbon::parse($attendance->clock_out_time)->format('H:i');
+                }
 
-            // 休憩合計（秒）
-            $breakSeconds = 0;
+                $breakSeconds = 0;
 
-            foreach ($attendance->breaks as $break) {
-                if ($break->break_start_time && $break->break_end_time) {
+                foreach ($attendance->breakTimes as $break) {
 
-                    $bs = Carbon::parse($break->break_start_time);
-                    $be = Carbon::parse($break->break_end_time);
+                    if ($break->break_start_time && $break->break_end_time) {
 
-                    $diff = $bs->diffInSeconds($be);
+                        $bs = Carbon::parse($break->break_start_time);
+                        $be = Carbon::parse($break->break_end_time);
 
-                    if ($diff > 0) {
-                        $breakSeconds += $diff;
+                        $diff = $bs->diffInSeconds($be);
+
+                        if ($diff > 0) {
+                            $breakSeconds += $diff;
+                        }
                     }
                 }
-            }
 
-            if ($breakSeconds > 0) {
-                $bh = floor($breakSeconds / 3600);
-                $bm = floor(($breakSeconds % 3600) / 60);
-                $breakTotal = sprintf('%d:%02d', $bh, $bm);
-            }
+                if ($breakSeconds > 0) {
 
-            // 勤務合計（出勤〜退勤 - 休憩）
-            if ($attendance->clock_in_time && $attendance->clock_out_time) {
+                    $bh = floor($breakSeconds / 3600);
+                    $bm = floor(($breakSeconds % 3600) / 60);
 
-                $startWork = Carbon::parse($attendance->clock_in_time);
-                $endWork   = Carbon::parse($attendance->clock_out_time);
-
-                $workSeconds = $startWork->diffInSeconds($endWork);
-
-                $workSeconds -= $breakSeconds;
-
-                if ($workSeconds < 0) {
-                    $workSeconds = 0;
+                    $breakTotal = sprintf('%d:%02d', $bh, $bm);
                 }
 
-                $wh = floor($workSeconds / 3600);
-                $wm = floor(($workSeconds % 3600) / 60);
+                if ($attendance->clock_in_time && $attendance->clock_out_time) {
 
-                $workTotal = sprintf('%d:%02d', $wh, $wm);
+                    $startWork = Carbon::parse($attendance->clock_in_time);
+                    $endWork   = Carbon::parse($attendance->clock_out_time);
+
+                    $workSeconds = $startWork->diffInSeconds($endWork);
+
+                    $workSeconds -= $breakSeconds;
+
+                    if ($workSeconds < 0) {
+                        $workSeconds = 0;
+                    }
+
+                    $wh = floor($workSeconds / 3600);
+                    $wm = floor(($workSeconds % 3600) / 60);
+
+                    $workTotal = sprintf('%d:%02d', $wh, $wm);
+                }
             }
+
+            $data[] = [
+                'date'       => $date,
+                'attendance' => $attendance,
+                'clock_in'   => $clockIn,
+                'clock_out'  => $clockOut,
+                'break'      => $breakTotal,
+                'total'      => $workTotal,
+            ];
         }
 
-        $data[] = [
-            'date'       => $date,
-            'attendance' => $attendance,
-            'clock_in'   => $clockIn,
-            'clock_out'  => $clockOut,
-            'break'      => $breakTotal,
-            'total'      => $workTotal,
-        ];
+        return view('attendance.list', compact('data', 'month'));
     }
-
-    return view('attendance.list', compact('data', 'month'));
-}
 
     /*
     |--------------------------------------------------------------------------

@@ -3,23 +3,24 @@
    Figma寄せ：幅900 / 枠#E1E1E1 / 角丸10
 ================================= */
 
-/* ページ背景（一覧と同系） */
+/* ページ背景 */
 .attendance-detail-page {
     background: #F0EFF2;
     min-height: calc(100vh - 80px);
     padding: 60px 0;
 }
 
+/* コンテナ */
 .attendance-detail-page .attendance-container {
-    width: 900px;
+    width: 100%;
     max-width: 900px;
-    /* ←これ重要 */
     margin: 0 auto;
 }
 
-/* タイトル（左の黒バー付き） */
+/* タイトル */
 .attendance-detail-page .page-title {
-    width: 900px;
+    width: 100%;
+    max-width: 900px;
     margin: 0 auto 24px;
     font-size: 30px;
     font-weight: 700;
@@ -37,15 +38,15 @@
     display: inline-block;
 }
 
-/* カード（Figma: 900px / radius 10 / border 1px #E1E1E1） */
+/* カード */
 .attendance-detail-page .detail-card {
-    width: 900px;
+    width: 100%;
+    max-width: 900px;
     margin: 0 auto;
     background: #fff;
     border: 1px solid #E1E1E1;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: none;
     margin-bottom: 25px;
 }
 
@@ -64,14 +65,13 @@
     border-bottom: none;
 }
 
-/* セル（Figma寄せ：文字はグレー寄り・行高タイト） */
+/* セル */
 .attendance-detail-page .detail-table th,
 .attendance-detail-page .detail-table td {
     padding: 18px 32px;
     font-size: 16px;
     font-weight: 700;
     color: #737373;
-    letter-spacing: normal;
     line-height: 2;
     vertical-align: middle;
 }
@@ -82,21 +82,19 @@
     text-align: left;
 }
 
-/* 右カラム（値は黒） */
+/* 右カラム */
 .attendance-detail-page .detail-table td {
     color: #000;
-    letter-spacing: 5px;
-    /* 値は詰まって見える */
 }
 
-/* 日付（年/月日を左右に置く） */
+/* 日付 */
 .attendance-detail-page .date-row {
     display: flex;
     justify-content: space-between;
     width: 260px;
 }
 
-/* 入力欄：Figmaの見た目を崩さない程度に */
+/* 入力欄 */
 .attendance-detail-page .time-inputs {
     display: flex;
     align-items: center;
@@ -129,25 +127,23 @@
     color: #000;
 }
 
-/* 承認待ちメッセージ（Figma: 右下赤） */
+/* 承認待ちメッセージ */
 .attendance-detail-page .pending-message {
-    width: 900px;
+    width: 100%;
+    max-width: 900px;
     margin: 16px auto 0;
-
-    /* Figma: Inter / 800 / 18px / letter-spacing 15% / red 50% */
     font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 800;
-    line-height: 1;
     letter-spacing: 0.15em;
     color: rgba(255, 0, 0, 0.5);
-text-align: right;
-    
+    text-align: right;
 }
 
-/* 修正ボタン（右下） */
+/* ボタン */
 .attendance-detail-page .detail-actions {
-    width: 900px;
+    width: 100%;
+    max-width: 900px;
     margin: 16px auto 0;
     display: flex;
     justify-content: flex-end;
@@ -164,13 +160,16 @@ text-align: right;
     cursor: pointer;
 }
 
-/* PC（1400-1540px）でも崩れない（固定900px中央） */
+/* DG02: PC 1400〜1540px */
 @media screen and (min-width: 1400px) and (max-width: 1540px) {
 
+    .attendance-detail-page .attendance-container,
     .attendance-detail-page .detail-card,
     .attendance-detail-page .page-title,
     .attendance-detail-page .pending-message,
     .attendance-detail-page .detail-actions {
-        width: 900px;
+        max-width: 900px;
     }
+
 }
+

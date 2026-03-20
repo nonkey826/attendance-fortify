@@ -32,13 +32,11 @@
             <div class="detail-card">
                 <table class="detail-table">
 
-                    {{-- 名前 --}}
                     <tr>
                         <th>名前</th>
                         <td>{{ $attendance->user->name }}</td>
                     </tr>
 
-                    {{-- 日付 --}}
                     <tr>
                         <th>日付</th>
                         <td>
@@ -51,69 +49,32 @@
                                 </span>
                             </div>
 
-                            {{-- DB更新用 --}}
                             <input type="hidden" name="work_date" value="{{ $attendance->work_date }}">
                         </td>
                     </tr>
 
-                    {{-- 出勤・退勤 --}}
                     <tr>
                         <th>出勤・退勤</th>
                         <td class="time-inputs">
-
-                            <input
-                                type="time"
-                                name="clock_in_time"
-                                class="time-box"
-                                value="{{ $clockIn }}"
-                            >
-
+                            <input type="text" name="clock_in_time" class="time-box" value="{{ $clockIn }}">
                             <span class="time-sep">〜</span>
-
-                            <input
-                                type="time"
-                                name="clock_out_time"
-                                class="time-box"
-                                value="{{ $clockOut }}"
-                            >
-
+                            <input type="text" name="clock_out_time" class="time-box" value="{{ $clockOut }}">
                         </td>
                     </tr>
 
-                    {{-- 休憩 --}}
                     <tr>
                         <th>休憩</th>
                         <td class="time-inputs">
-
-                            <input
-                                type="time"
-                                name="break_start_time"
-                                class="time-box"
-                                value="{{ $breakStart }}"
-                            >
-
+                            <input type="text" name="break_start_time" class="time-box" value="{{ $breakStart }}">
                             <span class="time-sep">〜</span>
-
-                            <input
-                                type="time"
-                                name="break_end_time"
-                                class="time-box"
-                                value="{{ $breakEnd }}"
-                            >
-
+                            <input type="text" name="break_end_time" class="time-box" value="{{ $breakEnd }}">
                         </td>
                     </tr>
 
-                    {{-- 備考 --}}
                     <tr>
                         <th>備考</th>
                         <td>
-                            <input
-                                type="text"
-                                name="note"
-                                class="note-box"
-                                value="{{ $attendance->note }}"
-                            >
+                            <input type="text" name="note" class="note-box" value="{{ $attendance->note }}">
                         </td>
                     </tr>
 
@@ -121,7 +82,7 @@
             </div>
 
             <div class="detail-actions">
-                <button type="submit" class="btn-fix">保存</button>
+                <button type="submit" class="btn-fix">修正</button>
             </div>
 
         </form>
