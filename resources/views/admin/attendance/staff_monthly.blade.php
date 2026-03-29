@@ -7,32 +7,26 @@
     <h1 class="page-title">{{ $user->name }} さんの勤怠</h1>
 
     {{-- 月ナビ --}}
-    <div class="month-card">
+<div class="month-card">
 
-      <a class="month-link"
-         href="{{ route('admin.attendance.staff.monthly', [
-            'user' => $user,
-            'month' => $currentMonth->copy()->subMonth()->format('Y-m')
-         ]) }}">
-        <img src="{{ asset('images/arrow.png') }}" class="arrow-left">
-        前月
-      </a>
+  <a class="month-link"
+     href="/admin/attendance/staff/{{ $user->id }}?month={{ \Carbon\Carbon::parse(request('month', now()->format('Y-m')))->subMonth()->format('Y-m') }}">
+    <img src="{{ asset('images/arrow.png') }}" class="arrow-left">
+    前月
+  </a>
 
-      <div class="month-label">
-        <img src="{{ asset('images/month.png') }}" class="calendar-icon">
-        {{ $currentMonth->format('Y/m') }}
-      </div>
+  <div class="month-label">
+    <img src="{{ asset('images/month.png') }}" class="calendar-icon">
+    {{ request('month', now()->format('Y-m')) }}
+  </div>
 
-      <a class="month-link"
-         href="{{ route('admin.attendance.staff.monthly', [
-            'user' => $user,
-            'month' => $currentMonth->copy()->addMonth()->format('Y-m')
-         ]) }}">
-        翌月
-        <img src="{{ asset('images/arrow.png') }}" class="arrow-right">
-      </a>
+  <a class="month-link"
+     href="/admin/attendance/staff/{{ $user->id }}?month={{ \Carbon\Carbon::parse(request('month', now()->format('Y-m')))->addMonth()->format('Y-m') }}">
+    翌月
+    <img src="{{ asset('images/arrow.png') }}" class="arrow-right">
+  </a>
 
-    </div>
+</div>
 
     @php
       $attendanceByDate = $attendances->keyBy(fn($a) => \Carbon\Carbon::parse($a->work_date)->toDateString());

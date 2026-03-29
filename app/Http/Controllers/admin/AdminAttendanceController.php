@@ -97,61 +97,79 @@ class AdminAttendanceController extends Controller
     /**
      * スタッフ別 月次勤怠
      */
-    public function staffMonthly(Request $request, User $user)
-    {
-        $monthParam = $request->query('month');
+   public function staffMonthly(Request $request, User $user)
+{
+    $monthParam = $request->query('month');
 
-        try {
-            $currentMonth = $monthParam
-                ? Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth()
-                : now()->startOfMonth();
-        } catch (\Exception $e) {
-            $currentMonth = now()->startOfMonth();
-        }
-
-        $year = (int) $currentMonth->year;
-        $month = (int) $currentMonth->month;
-
-        $attendances = Attendance::where('user_id', $user->id)
-            ->whereMonth('work_date', $month)
-            ->whereYear('work_date', $year)
-            ->orderBy('work_date')
-            ->get();
-
-        return view('admin.attendance.staff_monthly', [
-            'user' => $user,
-            'currentMonth' => $currentMonth,
-            'attendances' => $attendances,
-        ]);
+    try {
+        $currentMonth = $monthParam
+            ? \Carbon\Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth()
+            : now()->startOfMonth();
+    } catch (\Exception $e) {
+        $currentMonth = now()->startOfMonth();
     }
 
-    /**
-     * 管理者 勤怠更新
-     */
+    $attendances = Attendance::where('user_id', $user->id)
+        ->whereBetween('work_date', [
+            $currentMonth->copy()->startOfMonth()->toDateString(),
+            $currentMonth->copy()->endOfMonth()->toDateString()
+        ])
+        ->orderBy('work_date')
+        ->get();
+
+    return view('admin.attendance.staff_monthly', [
+        'user' => $user,
+        'currentMonth' => $currentMonth,
+        'attendances' => $attendances,
+    ]);
+}
+
     public function update(Request $request, $id)
-    {
-        $attendance = Attendance::with('breakTimes')->findOrFail($id);
+{
+    $validated = $request->validate([
+        'requested_clock_in_time'  => ['required', 'date_format:H:i'],
+        'requested_clock_out_time' => ['required', 'date_format:H:i', 'after:requested_clock_in_time'],
+        'requested_note' => ['required'],
 
-        $attendance->update([
-            'clock_in_time' => $request->clock_in_time,
-            'clock_out_time' => $request->clock_out_time,
-            'note' => $request->note,
+        'breaks' => ['nullable', 'array'],
+        'breaks.*.start' => ['nullable', 'date_format:H:i', 'before:requested_clock_out_time'],
+        'breaks.*.end'   => ['nullable', 'date_format:H:i', 'after:breaks.*.start', 'before:requested_clock_out_time'],
+    ], [
+        'requested_clock_out_time.after' => '出勤時間もしくは退勤時間が不適切な値です',
+
+        'breaks.*.start.before' => '休憩時間が不適切な値です',
+        'breaks.*.end.after'    => '休憩時間が不適切な値です',
+        'breaks.*.end.before'   => '休憩時間もしくは退勤時間が不適切な値です',
+
+        'requested_note.required' => '備考を記入してください',
+    ]);
+
+    $attendance = Attendance::with('breakTimes')->findOrFail($id);
+
+    $attendance->update([
+        'clock_in_time'  => $validated['requested_clock_in_time'],
+        'clock_out_time' => $validated['requested_clock_out_time'],
+        'note'           => $validated['requested_note'],
+    ]);
+
+    $break = $attendance->breakTimes->first();
+
+    $start = $request->input('breaks.0.start');
+    $end   = $request->input('breaks.0.end');
+
+    if ($break) {
+        $break->update([
+            'attendance_id'    => $attendance->id,
+            'break_start_time' => $start ? $start . ':00' : null,
+            'break_end_time'   => $end ? $end . ':00' : null,
         ]);
-
-        $break = $attendance->breakTimes->first();
-
-if ($break) {
-    $break->update([
-        'break_start_time' => $request->break_start_time,
-        'break_end_time' => $request->break_end_time,
-    ]);
-} else {
-    $attendance->breakTimes()->create([
-        'break_start_time' => $request->break_start_time,
-        'break_end_time' => $request->break_end_time,
-    ]);
-}
-
-        return redirect()->route('admin.attendance.detail', $attendance->id);
+    } else {
+        $attendance->breakTimes()->create([
+            'attendance_id'    => $attendance->id,
+            'break_start_time' => $start ? $start . ':00' : null,
+            'break_end_time'   => $end ? $end . ':00' : null,
+        ]);
     }
-}
+
+    return redirect()->route('admin.attendance.detail', $attendance->id);
+}}

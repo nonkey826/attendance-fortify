@@ -21,12 +21,14 @@ class AttendanceCorrectionRequestController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        if ($status === 'approved') {
-            $query->where('status', 'approved');
-        } else {
-            $query->where('status', 'pending');
-            $status = 'pending';
-        }
+        // if ($status === 'approved') {
+        //     $query->where('status', 'approved');
+        // } else {
+        //     $query->where('status', 'pending');
+        //     $status = 'pending';
+        // }
+
+        $query->where('status', $status);
 
         $requests = $query->orderByDesc('created_at')->get();
 
@@ -134,11 +136,14 @@ class AttendanceCorrectionRequestController extends Controller
         }
 
         // ステータス更新
-        $correctionRequest->update([
-            'status' => 'approved',
-        ]);
+        // $correctionRequest->update([
+        //     'status' => 'approved',
+        // ]);
 
-        // ★ここだけ修正（管理者側に戻す）
+        $correctionRequest->status = 'approved';
+        $correctionRequest->save();
+
+
         return redirect()
             ->route('admin.stamp_correction_request.detail', $correctionRequest->id)
             ->with('status', '承認しました');

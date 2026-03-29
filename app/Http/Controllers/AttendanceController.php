@@ -1,12 +1,12 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Attendance;
 use App\Models\BreakTime;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+
+
 
 class AttendanceController extends Controller
 {
@@ -20,29 +20,25 @@ class AttendanceController extends Controller
         Carbon::setLocale('ja');
 
         $today = now()->toDateString();
-        $now   = now();
+ $now = now();
 
         $attendance = Attendance::where('user_id', auth()->id())
-            ->where('work_date', $today)
+           ->whereDate('work_date', $today)
             ->first();
 
         $activeBreak = null;
         $status = '勤務外';
 
-        if ($attendance) {
+        $status = '勤務外';
 
-            $activeBreak = BreakTime::where('attendance_id', $attendance->id)
-                ->whereNull('break_end_time')
-                ->first();
-
-            if ($attendance->clock_out_time) {
-                $status = '退勤済';
-            } elseif ($activeBreak) {
-                $status = '休憩中';
-            } else {
-                $status = '出勤中';
-            }
-        }
+if ($attendance) {
+    $status = match ($attendance->status) {
+        'working'  => '出勤中',
+        'break'    => '休憩中',
+        'finished' => '退勤済',
+        default    => '勤務外',
+    };
+}
 
         return view('attendance.index', [
             'attendance'  => $attendance,
@@ -116,100 +112,107 @@ class AttendanceController extends Controller
     | 勤怠一覧（月表示）
     |--------------------------------------------------------------------------
     */
-    public function list(Request $request)
-    {
-        $month = $request->query('month', now()->format('Y-m'));
+   public function list(Request $request)
+{
+    $month = $request->get('month') ?: now()->format('Y-m');
 
-        $start = Carbon::parse($month . '-01')->startOfMonth();
-        $end   = Carbon::parse($month . '-01')->endOfMonth();
+    $base = \Carbon\Carbon::parse($month . '-01');
 
-        $period = CarbonPeriod::create($start, $end);
+    $start = $base->copy()->startOfMonth();
+    $end   = $base->copy()->endOfMonth();
 
-        $attendances = Attendance::with('breakTimes')
-            ->where('user_id', auth()->id())
-            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
-            ->get();
+    $prev = $base->copy()->subMonth()->format('Y-m');
+    $next = $base->copy()->addMonth()->format('Y-m');
 
-        $data = [];
+    $period = \Carbon\CarbonPeriod::create($start, $end);
 
-        foreach ($period as $date) {
+    $attendances = Attendance::with('breakTimes')
+        ->where('user_id', auth()->id())
+        ->whereBetween('work_date', [
+            $start->toDateString(),
+            $end->toDateString()
+        ])
+        ->get();
 
-            $dateString = $date->toDateString();
-            $attendance = $attendances->firstWhere('work_date', $dateString);
+    $data = [];
 
-            $clockIn    = '';
-            $clockOut   = '';
-            $breakTotal = '';
-            $workTotal  = '';
+    foreach ($period as $date) {
 
-            if ($attendance) {
+        $dateString = $date->toDateString();
+        $attendance = $attendances->firstWhere('work_date', $dateString);
 
-                if ($attendance->clock_in_time) {
-                    $clockIn = Carbon::parse($attendance->clock_in_time)->format('H:i');
-                }
+        $clockIn    = '';
+        $clockOut   = '';
+        $breakTotal = '';
+        $workTotal  = '';
 
-                if ($attendance->clock_out_time) {
-                    $clockOut = Carbon::parse($attendance->clock_out_time)->format('H:i');
-                }
+        if ($attendance) {
 
-                $breakSeconds = 0;
+            if ($attendance->clock_in_time) {
+                $clockIn = \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i');
+            }
 
-                foreach ($attendance->breakTimes as $break) {
+            if ($attendance->clock_out_time) {
+                $clockOut = \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i');
+            }
 
-                    if ($break->break_start_time && $break->break_end_time) {
+            $breakSeconds = 0;
 
-                        $bs = Carbon::parse($break->break_start_time);
-                        $be = Carbon::parse($break->break_end_time);
+            foreach ($attendance->breakTimes as $break) {
 
-                        $diff = $bs->diffInSeconds($be);
+                if ($break->break_start_time && $break->break_end_time) {
 
-                        if ($diff > 0) {
-                            $breakSeconds += $diff;
-                        }
+                    $bs = \Carbon\Carbon::parse($break->break_start_time);
+                    $be = \Carbon\Carbon::parse($break->break_end_time);
+
+                    $diff = $bs->diffInSeconds($be);
+
+                    if ($diff > 0) {
+                        $breakSeconds += $diff;
                     }
-                }
-
-                if ($breakSeconds > 0) {
-
-                    $bh = floor($breakSeconds / 3600);
-                    $bm = floor(($breakSeconds % 3600) / 60);
-
-                    $breakTotal = sprintf('%d:%02d', $bh, $bm);
-                }
-
-                if ($attendance->clock_in_time && $attendance->clock_out_time) {
-
-                    $startWork = Carbon::parse($attendance->clock_in_time);
-                    $endWork   = Carbon::parse($attendance->clock_out_time);
-
-                    $workSeconds = $startWork->diffInSeconds($endWork);
-
-                    $workSeconds -= $breakSeconds;
-
-                    if ($workSeconds < 0) {
-                        $workSeconds = 0;
-                    }
-
-                    $wh = floor($workSeconds / 3600);
-                    $wm = floor(($workSeconds % 3600) / 60);
-
-                    $workTotal = sprintf('%d:%02d', $wh, $wm);
                 }
             }
 
-            $data[] = [
-                'date'       => $date,
-                'attendance' => $attendance,
-                'clock_in'   => $clockIn,
-                'clock_out'  => $clockOut,
-                'break'      => $breakTotal,
-                'total'      => $workTotal,
-            ];
+            if ($breakSeconds > 0) {
+
+                $bh = floor($breakSeconds / 3600);
+                $bm = floor(($breakSeconds % 3600) / 60);
+
+                $breakTotal = sprintf('%d:%02d', $bh, $bm);
+            }
+
+            if ($attendance->clock_in_time && $attendance->clock_out_time) {
+
+                $startWork = \Carbon\Carbon::parse($attendance->clock_in_time);
+                $endWork   = \Carbon\Carbon::parse($attendance->clock_out_time);
+
+                $workSeconds = $startWork->diffInSeconds($endWork);
+
+                $workSeconds -= $breakSeconds;
+
+                if ($workSeconds < 0) {
+                    $workSeconds = 0;
+                }
+
+                $wh = floor($workSeconds / 3600);
+                $wm = floor(($workSeconds % 3600) / 60);
+
+                $workTotal = sprintf('%d:%02d', $wh, $wm);
+            }
         }
 
-        return view('attendance.list', compact('data', 'month'));
+        $data[] = [
+            'date'       => $date,
+            'attendance' => $attendance,
+            'clock_in'   => $clockIn,
+            'clock_out'  => $clockOut,
+            'break'      => $breakTotal,
+            'total'      => $workTotal,
+        ];
     }
 
+    return view('attendance.list', compact('data', 'month', 'prev', 'next'));
+}
     /*
     |--------------------------------------------------------------------------
     | 休憩開始
@@ -234,19 +237,29 @@ class AttendanceController extends Controller
         }
 
         $isBreaking = BreakTime::where('attendance_id', $attendance->id)
-            ->whereNull('break_end_time')
-            ->exists();
+    ->whereNull('break_end_time')
+    ->exists() && $attendance->status === 'break';
 
         if ($isBreaking) {
             return redirect()->route('attendance.index')
                 ->with('error', 'すでに休憩中です');
         }
 
-        BreakTime::create([
-            'attendance_id'    => $attendance->id,
-            'break_start_time' => now()->toTimeString(),
-        ]);
+        // BreakTime::create([
+        //     'attendance_id'    => $attendance->id,
+        //     'break_start_time' => now()->toTimeString(),
+        // ]);
 
+        BreakTime::create([
+    'attendance_id'    => $attendance->id,
+    'break_start_time' => now()->toTimeString(),
+]);
+
+$attendance->status = 'break';
+$attendance->save();
+
+        
+        
         return redirect()->route('attendance.index');
     }
 
@@ -285,6 +298,10 @@ class AttendanceController extends Controller
 
         $break->update([
             'break_end_time' => now()->toTimeString(),
+        ]);
+
+        $attendance->update([
+            'status' => 'working',
         ]);
 
         return redirect()->route('attendance.index');

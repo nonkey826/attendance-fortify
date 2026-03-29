@@ -9,6 +9,15 @@
         <form method="POST" action="{{ route('admin.attendance.update', $attendance->id) }}">
             @csrf
 
+@if ($errors->any())
+        <div class="error-messages">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
+
+
             @php
                 $break = $attendance->breakTimes->first();
 
@@ -56,25 +65,25 @@
                     <tr>
                         <th>出勤・退勤</th>
                         <td class="time-inputs">
-                            <input type="text" name="clock_in_time" class="time-box" value="{{ $clockIn }}">
+                            <input type="text" name="requested_clock_in_time" class="time-box" value="{{ old('requested_clock_in_time', $clockIn) }}">
                             <span class="time-sep">〜</span>
-                            <input type="text" name="clock_out_time" class="time-box" value="{{ $clockOut }}">
+                            <input type="text" name="requested_clock_out_time" class="time-box" value="{{ old('requested_clock_out_time', $clockOut) }}">
                         </td>
                     </tr>
 
                     <tr>
                         <th>休憩</th>
                         <td class="time-inputs">
-                            <input type="text" name="break_start_time" class="time-box" value="{{ $breakStart }}">
-                            <span class="time-sep">〜</span>
-                            <input type="text" name="break_end_time" class="time-box" value="{{ $breakEnd }}">
+                            <input type="text" name="breaks[0][start]" class="time-box" value="{{ old('breaks.0.start', $breakStart) }}">
+<span class="time-sep">〜</span>
+<input type="text" name="breaks[0][end]" class="time-box" value="{{ old('breaks.0.end', $breakEnd) }}">
                         </td>
                     </tr>
 
                     <tr>
                         <th>備考</th>
                         <td>
-                            <input type="text" name="note" class="note-box" value="{{ $attendance->note }}">
+                            <input type="text" name="requested_note" class="note-box" value="{{ old('requested_note', $attendance->note) }}">
                         </td>
                     </tr>
 

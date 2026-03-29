@@ -11,7 +11,7 @@
 
     {{-- 日付 --}}
     <div class="date">
-        {{ $now->isoFormat('Y年M月D日(ddd)') }}
+       {{ $now->isoFormat('YYYY年M月D日（ddd）') }}
     </div>
 
     {{-- 時刻 --}}
@@ -27,9 +27,7 @@
                 @csrf
                 <button class="btn-primary">出勤</button>
             </form>
-        @endif
-
-        @if($status === '出勤中')
+        @elseif($status === '出勤中')
             <form method="POST" action="{{ route('attendance.clockOut') }}">
                 @csrf
                 <button class="btn-primary">退勤</button>
@@ -39,16 +37,12 @@
                 @csrf
                 <button class="btn-secondary">休憩入</button>
             </form>
-        @endif
-
-        @if($status === '休憩中')
+        @elseif($status === '休憩中')
             <form method="POST" action="{{ route('attendance.breakEnd') }}">
                 @csrf
                 <button class="btn-secondary">休憩戻</button>
             </form>
-        @endif
-
-        @if($status === '退勤済')
+        @elseif($status === '退勤済')
             <div class="message">お疲れ様でした。</div>
         @endif
 
@@ -64,8 +58,8 @@ function updateClock(){
     const m = String(now.getMinutes()).padStart(2,'0');
     document.getElementById('clock').textContent = h + ':' + m;
 }
-
 setInterval(updateClock,1000);
 </script>
 
 @endsection
+

@@ -9,9 +9,9 @@
         @if ($errors->any())
             <div style="margin:16px 0; padding:12px; border:1px solid #b00; border-radius:8px; color:#b00;">
                 <ul style="margin:0; padding-left:18px;">
-                    @foreach ($errors->all() as $e)
-                        <li>{{ $e }}</li>
-                    @endforeach
+                    @foreach (collect($errors->all())->unique() as $e)
+    <li>{{ $e }}</li>
+@endforeach
                 </ul>
             </div>
         @endif
