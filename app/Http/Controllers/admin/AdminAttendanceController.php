@@ -135,6 +135,7 @@ class AdminAttendanceController extends Controller
         'breaks.*.start' => ['nullable', 'date_format:H:i', 'before:requested_clock_out_time'],
         'breaks.*.end'   => ['nullable', 'date_format:H:i', 'after:breaks.*.start', 'before:requested_clock_out_time'],
     ], [
+        'requested_clock_in_time.date_format' => '出勤時間が不適切な値です',
         'requested_clock_out_time.after' => '出勤時間もしくは退勤時間が不適切な値です',
 
         'breaks.*.start.before' => '休憩時間が不適切な値です',
@@ -152,24 +153,20 @@ class AdminAttendanceController extends Controller
         'note'           => $validated['requested_note'],
     ]);
 
-    $break = $attendance->breakTimes->first();
 
-    $start = $request->input('breaks.0.start');
-    $end   = $request->input('breaks.0.end');
 
-    if ($break) {
-        $break->update([
-            'attendance_id'    => $attendance->id,
-            'break_start_time' => $start ? $start . ':00' : null,
-            'break_end_time'   => $end ? $end . ':00' : null,
-        ]);
-    } else {
+   
+$attendance->breakTimes()->delete();
+
+foreach ($request->input('breaks', []) as $b) {
+    if (!empty($b['start']) || !empty($b['end'])) {
         $attendance->breakTimes()->create([
             'attendance_id'    => $attendance->id,
-            'break_start_time' => $start ? $start . ':00' : null,
-            'break_end_time'   => $end ? $end . ':00' : null,
+            'break_start_time' => !empty($b['start']) ? $b['start'] . ':00' : null,
+            'break_end_time'   => !empty($b['end']) ? $b['end'] . ':00' : null,
         ]);
     }
+}
 
     return redirect()->route('admin.attendance.detail', $attendance->id);
 }}

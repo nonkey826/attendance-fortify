@@ -7,17 +7,11 @@
 
         <h2 class="page-title">勤怠一覧</h2>
 
-{{-- 月ナビ --}}
-@php
-    $currentMonth = request('month', now()->format('Y-m'));
-    $base = \Carbon\Carbon::parse($currentMonth . '-01');
-@endphp
-
 <div class="month-card">
 
     {{-- 前月 --}}
     <a class="month-link"
-       href="{{ route('attendance.list') }}?month={{ $base->copy()->subMonth()->format('Y-m') }}">
+       href="{{ route('attendance.list') }}?month={{ $prev }}">
         <img src="{{ asset('images/arrow.png') }}" class="arrow-left">
         前月
     </a>
@@ -25,18 +19,17 @@
     {{-- 月表示 --}}
     <div class="month-label">
         <img src="{{ asset('images/month.png') }}" class="calendar-icon">
-        {{ $base->format('Y/m') }}
+        {{ \Carbon\Carbon::parse($month . '-01')->format('Y/m') }}
     </div>
 
     {{-- 翌月 --}}
     <a class="month-link"
-       href="{{ route('attendance.list') }}?month={{ $base->copy()->addMonth()->format('Y-m') }}">
+       href="{{ route('attendance.list') }}?month={{ $next }}">
         翌月
         <img src="{{ asset('images/arrow.png') }}" class="arrow-right">
     </a>
 
 </div>
-
 
 
         {{-- テーブルカード --}}

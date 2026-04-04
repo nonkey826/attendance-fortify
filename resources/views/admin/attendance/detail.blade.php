@@ -9,17 +9,17 @@
         <form method="POST" action="{{ route('admin.attendance.update', $attendance->id) }}">
             @csrf
 
-@if ($errors->any())
-        <div class="error-messages">
-            @foreach ($errors->all() as $error)
-                <p>{{ $error }}</p>
-            @endforeach
-        </div>
-    @endif
-
+            @if ($errors->any())
+                <div class="error-messages">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
 
             @php
-                $break = $attendance->breakTimes->first();
+                $break1 = $attendance->breakTimes->get(0);
+                $break2 = $attendance->breakTimes->get(1);
 
                 $clockIn = $attendance->clock_in_time
                     ? \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i')
@@ -29,12 +29,20 @@
                     ? \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i')
                     : '';
 
-                $breakStart = $break?->break_start_time
-                    ? \Carbon\Carbon::parse($break->break_start_time)->format('H:i')
+                $break1Start = $break1?->break_start_time
+                    ? \Carbon\Carbon::parse($break1->break_start_time)->format('H:i')
                     : '';
 
-                $breakEnd = $break?->break_end_time
-                    ? \Carbon\Carbon::parse($break->break_end_time)->format('H:i')
+                $break1End = $break1?->break_end_time
+                    ? \Carbon\Carbon::parse($break1->break_end_time)->format('H:i')
+                    : '';
+
+                $break2Start = $break2?->break_start_time
+                    ? \Carbon\Carbon::parse($break2->break_start_time)->format('H:i')
+                    : '';
+
+                $break2End = $break2?->break_end_time
+                    ? \Carbon\Carbon::parse($break2->break_end_time)->format('H:i')
                     : '';
             @endphp
 
@@ -57,7 +65,6 @@
                                     {{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}
                                 </span>
                             </div>
-
                             <input type="hidden" name="work_date" value="{{ $attendance->work_date }}">
                         </td>
                     </tr>
@@ -74,9 +81,18 @@
                     <tr>
                         <th>休憩</th>
                         <td class="time-inputs">
-                            <input type="text" name="breaks[0][start]" class="time-box" value="{{ old('breaks.0.start', $breakStart) }}">
-<span class="time-sep">〜</span>
-<input type="text" name="breaks[0][end]" class="time-box" value="{{ old('breaks.0.end', $breakEnd) }}">
+                            <input type="text" name="breaks[0][start]" class="time-box" value="{{ old('breaks.0.start', $break1Start) }}">
+                            <span class="time-sep">〜</span>
+                            <input type="text" name="breaks[0][end]" class="time-box" value="{{ old('breaks.0.end', $break1End) }}">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>休憩2</th>
+                        <td class="time-inputs">
+                            <input type="text" name="breaks[1][start]" class="time-box" value="{{ old('breaks.1.start', $break2Start) }}">
+                            <span class="time-sep">〜</span>
+                            <input type="text" name="breaks[1][end]" class="time-box" value="{{ old('breaks.1.end', $break2End) }}">
                         </td>
                     </tr>
 

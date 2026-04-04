@@ -72,8 +72,9 @@ $validated = $request->validate([
     'requested_clock_in_time'  => $validated['requested_clock_in_time'],
     'requested_clock_out_time' => $validated['requested_clock_out_time'],
 
-    'requested_break_start_time' => $validated['breaks'][0]['start'] ?? null,
-    'requested_break_end_time'   => $validated['breaks'][0]['end'] ?? null,
+
+'requested_break_start_time' => json_encode(array_column($request->input('breaks', []), 'start')),
+'requested_break_end_time'   => json_encode(array_column($request->input('breaks', []), 'end')),
 
     'requested_note' => $validated['requested_note'],
     'status' => 'pending',

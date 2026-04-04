@@ -13,22 +13,7 @@ class StoreAttendanceCorrectionRequest extends FormRequest
 
     public function rules(): array
 {
-    // return [
-    //     'requested_work_date'      => ['nullable', 'date'],
-    //     'requested_clock_in_time'  => ['nullable', 'date_format:H:i'],
-    //     'requested_clock_out_time' => ['nullable', 'date_format:H:i', 'after:requested_clock_in_time'],
-
-    //     'requested_break_start_time' => ['nullable', 'date_format:H:i'],
-    //     'requested_break_end_time'   => ['nullable', 'date_format:H:i'],
-
-    //     'requested_note'           => ['required', 'string', 'max:2000'],
-
-    //     'breaks'         => ['nullable', 'array'],
-    //     'breaks.*.start' => ['nullable', 'date_format:H:i', 'before:requested_clock_out_time'],
-    //     'breaks.*.end'   => ['nullable', 'date_format:H:i', 'after:breaks.*.start', 'before:requested_clock_out_time'],
-    // ];
-
-
+    
     return [
     'requested_work_date'      => ['nullable', 'date'],
 
@@ -40,7 +25,8 @@ class StoreAttendanceCorrectionRequest extends FormRequest
 
     'requested_note'           => ['required', 'string', 'max:2000'],
 
-    'breaks'         => ['nullable', 'array'],
+    // 'breaks'         => ['nullable', 'array'],
+    'breaks' => ['present', 'array'],
     'breaks.*.start' => ['nullable', 'regex:/^\d{1,2}:\d{2}$/'],
     'breaks.*.end'   => ['nullable', 'regex:/^\d{1,2}:\d{2}$/'],
 ];
@@ -49,20 +35,42 @@ class StoreAttendanceCorrectionRequest extends FormRequest
 {
     return [
 
+
         // 出退勤
-        'requested_clock_in_time.date_format'  => '出勤時間が不適切な値です',
-        'requested_clock_out_time.date_format' => '退勤時間が不適切な値です',
+        'requested_clock_in_time.required'  => '出勤時間を入力してください',
+        'requested_clock_in_time.regex'     => '出勤時間が不適切な値です',
+        'requested_clock_in_time.date_format'=> '出勤時間が不適切な値です',
+
+        'requested_clock_out_time.required' => '退勤時間を入力してください',
+        'requested_clock_out_time.regex'    => '退勤時間が不適切な値です',
+        'requested_clock_out_time.date_format'=> '退勤時間が不適切な値です',
 
         // 単発休憩
-        'requested_break_start_time.date_format' => '休憩時間が不適切な値です',
-        'requested_break_end_time.date_format'   => '休憩時間が不適切な値です',
+        'requested_break_start_time.regex' => '休憩時間が不適切な値です',
+        'requested_break_end_time.regex'   => '休憩時間が不適切な値です',
 
         // 配列休憩
-        'breaks.*.start.date_format' => '休憩時間が不適切な値です',
-        'breaks.*.end.date_format'   => '休憩時間が不適切な値です',
+        'breaks.*.start.regex' => '休憩時間が不適切な値です',
+        'breaks.*.end.regex'   => '休憩時間が不適切な値です',
 
         // 備考
         'requested_note.required' => '備考を記入してください',
+
+      
+        // 'requested_clock_in_time.required'  => '出勤時間を入力してください',
+        // 'requested_clock_in_time.date_format'  => '出勤時間が不適切な値です',
+
+        // 'requested_clock_out_time.required' => '退勤時間を入力してください',
+        // 'requested_clock_out_time.date_format' => '退勤時間が不適切な値です',
+
+      
+        // 'requested_break_start_time.date_format' => '休憩時間が不適切な値です',
+        // 'requested_break_end_time.date_format'   => '休憩時間が不適切な値です',
+
+        // 'breaks.*.start.date_format' => '休憩時間が不適切な値です',
+        // 'breaks.*.end.date_format'   => '休憩時間が不適切な値です',
+
+        // 'requested_note.required' => '備考を記入してください',
     ];
 }
 

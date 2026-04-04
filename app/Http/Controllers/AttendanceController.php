@@ -116,6 +116,7 @@ if ($attendance) {
 {
     $month = $request->get('month') ?: now()->format('Y-m');
 
+   
     $base = \Carbon\Carbon::parse($month . '-01');
 
     $start = $base->copy()->startOfMonth();
@@ -305,5 +306,15 @@ $attendance->save();
         ]);
 
         return redirect()->route('attendance.index');
-    }
+}
+
+        public function show($id)
+{
+    $attendance = Attendance::with('breakTimes')->findOrFail($id);
+
+    $breaks = $attendance->breakTimes;
+    $pendingRequest = $attendance->pendingRequest ?? null;
+
+    return view('attendance.detail', compact('attendance', 'breaks', 'pendingRequest'));
+}
 }

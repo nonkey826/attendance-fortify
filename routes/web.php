@@ -70,18 +70,16 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/register', function (RegisterRequest $request) {
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'user',
-        ]);
+    $user = User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->password),
+        'role'     => 'user',
+    ]);
 
-        Auth::login($user);
+    return redirect()->route('login');
 
-        return redirect()->route('attendance.index');
-
-    })->name('register.process');
+})->name('register.process');
 });
 
 /*
@@ -89,7 +87,12 @@ Route::middleware('guest')->group(function () {
 | 認証後ルート（一般ユーザー）
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| 認証後ルート（一般ユーザー）
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [AuthController::class, 'index'])->name('home');
 
@@ -101,11 +104,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/attendance/break', [AttendanceController::class, 'break']);
 
-    
     Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart'])->name('attendance.breakStart');
     Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])->name('attendance.breakEnd');
 
-    Route::get('/attendance/detail/{id}', [AttendanceListController::class, 'show'])
+    Route::get('/attendance/detail/{id}', [AttendanceController::class, 'show'])
         ->name('attendance.detail');
 
     // 修正申請
@@ -113,7 +115,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [AttendanceCorrectionRequestController::class, 'index'])
         ->name('stamp_correction_request.list');
 
-    Route::get('/stamp_correction_request/{attendance_correct_request}',
+    Route::get('/stamp_correction_request/{attendance_correction_request}',
         [AttendanceCorrectionRequestController::class, 'show'])
         ->name('stamp_correction_request.show');
 
@@ -121,7 +123,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [AttendanceCorrectionController::class, 'store'])
         ->name('stamp_correction_request.store');
 });
-
 /*
 |--------------------------------------------------------------------------
 | ★テスト用承認ルート（重要）

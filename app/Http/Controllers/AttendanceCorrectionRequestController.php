@@ -16,17 +16,9 @@ class AttendanceCorrectionRequestController extends Controller
 
         $query = AttendanceCorrectionRequest::with(['user', 'attendance']);
 
-        // 一般ユーザーは自分の申請のみ
         if (auth()->user()->role !== 'admin') {
             $query->where('user_id', auth()->id());
         }
-
-        // if ($status === 'approved') {
-        //     $query->where('status', 'approved');
-        // } else {
-        //     $query->where('status', 'pending');
-        //     $status = 'pending';
-        // }
 
         $query->where('status', $status);
 
@@ -37,7 +29,6 @@ class AttendanceCorrectionRequestController extends Controller
             'requests' => $requests
         ]);
     }
-
 
     public function store(StoreAttendanceCorrectionRequest $request, Attendance $attendance)
     {
@@ -57,14 +48,22 @@ class AttendanceCorrectionRequestController extends Controller
 
         $validated = $request->validated();
 
+        $breaks = collect($request->input('breaks', []))
+    ->filter(function ($b) {
+        return !empty($b['start']) && !empty($b['end']);
+    })
+    ->values();
+
         AttendanceCorrectionRequest::create([
             'attendance_id'              => $attendance->id,
             'user_id'                    => auth()->id(),
             'requested_work_date'        => $validated['requested_work_date'] ?? null,
             'requested_clock_in_time'    => $validated['requested_clock_in_time'] ?? null,
             'requested_clock_out_time'   => $validated['requested_clock_out_time'] ?? null,
-            'requested_break_start_time' => $validated['requested_break_start_time'] ?? null,
-            'requested_break_end_time'   => $validated['requested_break_end_time'] ?? null,
+
+            'requested_break_start_time' => json_encode($breaks->pluck('start')->toArray()),
+'requested_break_end_time'   => json_encode($breaks->pluck('end')->toArray()),
+
             'requested_note'             => $validated['requested_note'] ?? null,
             'status'                     => 'pending',
         ]);
@@ -73,16 +72,6 @@ class AttendanceCorrectionRequestController extends Controller
             ->route('attendance.detail', $attendance->id)
             ->with('status', '修正申請を送信しました（承認待ち）');
     }
-
-
-    public function show($id)
-    {
-        $correctionRequest = AttendanceCorrectionRequest::with(['user', 'attendance.breakTimes'])
-            ->findOrFail($id);
-
-        return view('stamp_correction_request.show', compact('correctionRequest'));
-    }
-
 
     public function approve($attendance_correct_request_id)
     {
@@ -97,7 +86,6 @@ class AttendanceCorrectionRequestController extends Controller
                 ->withErrors(['request' => '対象の勤怠情報が見つかりません。']);
         }
 
-        // 勤怠更新（個別代入）
         if ($correctionRequest->requested_work_date) {
             $attendance->work_date = $correctionRequest->requested_work_date;
         }
@@ -116,45 +104,50 @@ class AttendanceCorrectionRequestController extends Controller
 
         $attendance->save();
 
-        // 休憩更新
-        if ($correctionRequest->requested_break_start_time && $correctionRequest->requested_break_end_time) {
+        $attendance->breakTimes()->delete();
 
-            $break = $attendance->breakTimes()->first();
+$starts = json_decode($correctionRequest->requested_break_start_time, true) ?? [];
+$ends   = json_decode($correctionRequest->requested_break_end_time, true) ?? [];
 
-            if ($break) {
-                $break->update([
-                    'break_start_time' => $correctionRequest->requested_break_start_time,
-                    'break_end_time'   => $correctionRequest->requested_break_end_time,
-                ]);
-            } else {
-                BreakTime::create([
-                    'attendance_id'    => $attendance->id,
-                    'break_start_time' => $correctionRequest->requested_break_start_time,
-                    'break_end_time'   => $correctionRequest->requested_break_end_time,
-                ]);
-            }
-        }
+foreach ($starts as $i => $start) {
+    $end = $ends[$i] ?? null;
 
-        // ステータス更新
-        // $correctionRequest->update([
-        //     'status' => 'approved',
-        // ]);
+    if ($start || $end) {
+        $attendance->breakTimes()->create([
+            'attendance_id'    => $attendance->id,
+            'break_start_time' => $start ? $start . ':00' : null,
+            'break_end_time'   => $end ? $end . ':00' : null,
+        ]);
+    }
+}
 
         $correctionRequest->status = 'approved';
         $correctionRequest->save();
-
 
         return redirect()
             ->route('admin.stamp_correction_request.detail', $correctionRequest->id)
             ->with('status', '承認しました');
     }
 
+    public function show($id)
+    {
+        $correctionRequest = AttendanceCorrectionRequest::with(['user', 'attendance.breakTimes'])
+            ->findOrFail($id);
+
+        $attendance = $correctionRequest->attendance;
+        $breaks = $attendance->breakTimes;
+
+        return view('stamp_correction_request.show', compact('correctionRequest', 'attendance', 'breaks'));
+    }
 
     public function adminShow($id)
     {
         $correctionRequest = AttendanceCorrectionRequest::with(['user', 'attendance.breakTimes'])
             ->findOrFail($id);
 
-        return view('stamp_correction_request.show', compact('correctionRequest'));
+        $attendance = $correctionRequest->attendance;
+        $breaks = $attendance->breakTimes;
+
+        return view('stamp_correction_request.show', compact('correctionRequest', 'attendance', 'breaks'));
     }
 }

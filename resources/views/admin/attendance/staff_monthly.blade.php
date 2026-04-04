@@ -17,7 +17,7 @@
 
   <div class="month-label">
     <img src="{{ asset('images/month.png') }}" class="calendar-icon">
-    {{ request('month', now()->format('Y-m')) }}
+   {{ \Carbon\Carbon::parse(request('month', now()->format('Y-m')))->format('Y/m') }}
   </div>
 
   <a class="month-link"
