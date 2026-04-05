@@ -27,7 +27,7 @@
         <input type="password" name="password">
     </div>
 
-    <button type="submit">ログイン</button>
+    <button type="submit">管理者ログインする</button>
 </form>
 
 

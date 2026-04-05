@@ -83,17 +83,12 @@ Route::middleware('guest')->group(function () {
 });
 
 /*
-|--------------------------------------------------------------------------
-| 認証後ルート（一般ユーザー）
-|--------------------------------------------------------------------------
-*/
 /*
 |--------------------------------------------------------------------------
 | 認証後ルート（一般ユーザー）
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
-
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('home');
 
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
