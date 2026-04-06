@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 管理者
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@test.com'],
             [
                 'name' => 'admin',
@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
                 'role' => 'admin'
             ]
         );
+
+        // 管理者ユーザーを作成した後に、メール認証を完了させます
+        $admin->email_verified_at = now();
+        $admin->save();
 
         // 一般ユーザー
         $user = User::updateOrCreate(

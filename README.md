@@ -125,7 +125,7 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 ### 管理者
 
 * **Email**: [admin@test.com](mailto:admin@test.com)
-* **Password**: `admin123`
+* **Password**: `admin`
 
 ### 一般ユーザー
 
