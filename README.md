@@ -265,80 +265,24 @@ php artisan db:seed
 
 ---
 
-## テストコード実行（Windows & MacOS）
+テスト実行手順（Docker環境）
+1. 依存関係のインストール
 
-Laravelのテストを実行するためには、PHPがインストールされている必要があります。以下の手順で、**MacOS** と **Windows** の両方でPHPをインストールし、テストコードを実行します。
-
-### **1. PHPのインストール**
-
-#### **MacOSの場合**
-
-1. **Homebrewを使ってPHPをインストール**
-
-   MacOSでは **Homebrew** を使用してPHPをインストールできます。以下のコマンドでHomebrewをインストールします：
-
-   ```bash
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-   ```
-
-   次に、PHPをインストールします：
-
-   ```bash
-   brew install php
-   ```
-
-2. **インストール確認**
-
-   PHPが正しくインストールされたことを確認するために、以下のコマンドを実行します：
-
-   ```bash
-   php -v
-   ```
-
-#### **Windowsの場合**
-
-1. **PHPのインストール**
-
-   **Windows**では、[PHP公式サイト](https://windows.php.net/download/)からPHPをインストールするか、**XAMPP** などのパッケージをインストールしてPHPをセットアップできます。
-
-   もし手動でインストールする場合、[PHPのWindows版インストーラ](https://windows.php.net/download/)を使ってインストールします。
-
-2. **インストール確認**
-
-   PHPが正しくインストールされたか確認するために、コマンドプロンプトまたはPowerShellで以下のコマンドを実行します：
-
-   ```bash
-   php -v
-   ```
-
----
-
-### **2. テストの実行**
-
-PHPが正しくインストールされたら、次にLaravelのテストを実行します。以下のコマンドを実行してテストを開始します：
-
-```bash
-php artisan test
-```
-
-これにより、**Laravelのテストスイート** が実行され、アプリケーションの動作確認ができます。
-
----
-
-### **3. 依存関係のインストール（もし必要な場合）**
-
-もし依存関係がインストールされていない場合、以下のコマンドでインストールします：
-
+まず、プロジェクトに必要な依存関係をインストールします。以下のコマンドを実行してください：
 ```bash
 docker-compose exec php composer install
 ```
+これにより、プロジェクトに必要なすべてのパッケージがインストールされます。
 
----
+2. テスト実行の前提
 
-### **まとめ**
+Docker 環境では、テストを実行するために PHP がコンテナ内で動作することが重要です。php artisan test が コンテナ内で実行 されることを確認してください。
 
-* **MacOSの場合**: Homebrewを使ってPHPをインストールし、ターミナルで`php -v`で確認。
-* **Windowsの場合**: PHP公式サイトまたはXAMPPを使ってPHPをインストールし、コマンドプロンプトで`php -v`で確認。
-* テストの実行: `php artisan test` コマンドでテストスイートを実行。
-* 依存関係のインストール: 必要に応じて、`composer install` でインストール。
-
+Docker コンテナ内に入って実行する
+```bash
+docker-compose exec php php artisan test
+```
+もしこれで動かない場合は、PHPUnit を使って実行
+```bash
+docker-compose exec php vendor/bin/phpunit
+```
