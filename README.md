@@ -1,7 +1,3 @@
-以下に、記号を使わずに丁寧に書き直した **README** を再度記載します。
-
----
-
 # 勤怠管理アプリ
 
 ## 概要
@@ -30,15 +26,24 @@
 
 アプリをローカル環境でセットアップするための手順を説明します。以下の手順に従って環境を構築してください。
 
- 1. Dockerの起動
+### 1. GitHubリポジトリをクローン
 
-まず、Dockerコンテナを起動します。これにより、必要なすべてのサービス（PHP、MySQL、Nginx、Mailhogなど）が立ち上がります。
+まず、GitHubからプロジェクトをクローンします。
+
+
+git clone https://github.com/nonkey826/attendance-fortify.git
+cd attendance-fortify
+
+
+### 2. Dockerの起動
+
+Dockerコンテナを起動します。これにより、必要なすべてのサービス（PHP、MySQL、Nginx、Mailhogなど）が立ち上がります。
 
 
 docker compose up -d
 
 
-2. PHPコンテナに入る
+### 3. PHPコンテナに入る
 
 次に、**PHPコンテナ** にアクセスします。コンテナ内で必要なコマンドを実行できます。
 
@@ -46,7 +51,7 @@ docker compose up -d
 docker compose exec php bash
 
 
- 3. 依存関係のインストール
+### 4. 依存関係のインストール
 
 PHPコンテナ内で、Laravelプロジェクトに必要な依存関係をインストールします。
 
@@ -54,16 +59,37 @@ PHPコンテナ内で、Laravelプロジェクトに必要な依存関係をイ�
 composer install
 
 
-4. 環境ファイル設定
+### 5. 環境ファイル設定
 
-`.env.example` ファイルを `.env` にコピーし、アプリケーションの設定を行います。その後、アプリケーションキーを生成します。
+`.env.example` ファイルを `.env` にコピーして、アプリケーションの設定を行います。その後、**アプリケーションキー**を生成します。
 
 
 cp .env.example .env
 php artisan key:generate
 
 
- 5. マイグレーションとダミーデータ投入
+`.env` ファイルの主な設定内容は以下の通りです。これらの設定は、アプリケーションのデータベースやメール送信機能に関連しています。
+
+#### **データベース設定**
+
+```env
+DB_CONNECTION=mysql            # データベースの接続ドライバ
+DB_HOST=mysql                  # MySQLのホスト名（Dockerサービス名：'mysql'）
+DB_PORT=3306                   # MySQLのポート
+DB_DATABASE=laravel_db         # 使用するデータベース名
+DB_USERNAME=laravel_user       # MySQLのユーザー名
+DB_PASSWORD=laravel_pass       # MySQLのパスワード
+```
+
+#### **メール設定**
+
+```env
+MAIL_MAILER=smtp              # 使用するメール送信の方式（開発環境ではMailhogを使用）
+MAIL_HOST=mailhog             # Mailhogのホスト名
+MAIL_PORT=1025                # Mailhogのポート番号
+```
+
+### 6. マイグレーションとダミーデータ投入
 
 データベースのマイグレーションを実行し、初期データ（ダミーデータ）を投入します。
 
@@ -111,18 +137,18 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 
 ### 実装内容
 
-* 新規会員登録時に、認証メールを送信します。
+* 新規会員登録時に認証メールを送信します。
 * メール未認証ユーザーはログイン後もアプリ機能を利用できません。
 * `verified` ミドルウェアにより、メール認証状態を制御します。
-* `MustVerifyEmail` を Userモデルに実装。
+* `MustVerifyEmail` を Userモデル に実装。
 * `email_verified_at` カラムにより認証状態を管理します。
 
 ### 開発環境でのメール確認方法
 
-1. **Mailhog** にアクセス：[http://localhost:8025](http://localhost:8025)
-2. 受信メール一覧から 認証メール*を選択します。
+1. Mailhog にアクセス：[http://localhost:8025](http://localhost:8025)
+2. 受信メール一覧から 認証メール を選択します。
 3. メール内の 認証リンクをクリックします。
-4. 認証完了後、勤怠画面に遷移します。
+4. 認証完了後、勤怠画面 に遷移します。
 
 ---
 
@@ -150,7 +176,7 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 
 ## データベース設計
 
-### usersテーブル
+### **usersテーブル**
 
 | カラム名              | 型                    |
 | ----------------- | -------------------- |
@@ -162,6 +188,50 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 | email_verified_at | timestamp (nullable) |
 | created_at        | timestamp            |
 | updated_at        | timestamp            |
+
+### **attendancesテーブル**
+
+| カラム名           | 型               | 制約          |
+| -------------- | --------------- | ----------- |
+| id             | unsigned bigint | 主キー         |
+| user_id        | unsigned bigint | 外部キー(users) |
+| work_date      | date            |             |
+| clock_in_time  | time            |             |
+| clock_out_time | time            |             |
+| status         | varchar(50)     |             |
+| note           | varchar(255)    |             |
+| created_at     | timestamp       |             |
+| updated_at     | timestamp       |             |
+
+### **attendance_correction_requestsテーブル**
+
+| カラム名                     | 型               | 制約                |
+| ------------------------ | --------------- | ----------------- |
+| id                       | unsigned bigint | 主キー               |
+| attendance_id            | unsigned bigint | 外部キー(attendances) |
+| user_id                  | unsigned bigint | 外部キー(users)       |
+| requested_clock_in_time  | time            |                   |
+| requested_clock_out_time | time            |                   |
+| requested_note           | text            |                   |
+| status                   | varchar(50)     |                   |
+| created_at               | timestamp       |                   |
+| updated_at               | timestamp       |                   |
+| approved_by              | unsigned bigint | 外部キー(users)       |
+| approved_at              | datetime        |                   |
+| requested_break_start    | text            | JSON配列（休憩開始時刻）    |
+| requested_break_end      | text            | JSON配列（休憩終了時刻）    |
+| admin_comment            | text            |                   |
+
+### **breaksテーブル**
+
+| カラム名             | 型               | 制約                |
+| ---------------- | --------------- | ----------------- |
+| id               | unsigned bigint | 主キー               |
+| attendance_id    | unsigned bigint | 外部キー(attendances) |
+| break_start_time | time            |                   |
+| break_end_time   | time            |                   |
+| created_at       | timestamp       |                   |
+| updated_at       | timestamp       |                   |
 
 ---
 
@@ -190,5 +260,17 @@ php artisan db:seed
 ## 補足
 
 * 本アプリでは、開発環境に Mailhogを使用しています。
-  本番環境では、SMTPサーバー（例：SendGrid、Mailgunなど）を使用することで、実際のメール送信が可能です。
+  本番環境では、**SMTPサーバー**（例：SendGrid、Mailgunなど）を使用することで、実際のメール送信が可能です。
+
+---
+
+## テストコード実行
+
+アプリケーションのテストを実行するためのコマンドです。
+
+
+php artisan test
+
+
+これにより、Laravelのテストスイートが実行され、アプリケーションの動作確認ができます。
 
