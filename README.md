@@ -30,44 +30,44 @@
 
 まず、GitHubからプロジェクトをクローンします。
 
-
+```bash
 git clone https://github.com/nonkey826/attendance-fortify.git
 
 cd attendance-fortify
-
+```
 
 ### 2. Dockerの起動
 
 Dockerコンテナを起動します。これにより、必要なすべてのサービス（PHP、MySQL、Nginx、Mailhogなど）が立ち上がります。
 
-
+```bash
 docker compose up -d
-
+```
 
 ### 3. PHPコンテナに入る
 
 次に、**PHPコンテナ** にアクセスします。コンテナ内で必要なコマンドを実行できます。
 
-
+```bash
 docker compose exec php bash
-
+```
 
 ### 4. 依存関係のインストール
 
 PHPコンテナ内で、Laravelプロジェクトに必要な依存関係をインストールします。
 
-
+```bash
 composer install
-
+```
 
 ### 5. 環境ファイル設定
 
 `.env.example` ファイルを `.env` にコピーして、アプリケーションの設定を行います。その後、**アプリケーションキー**を生成します。
 
-
+```bash
 cp .env.example .env
 php artisan key:generate
-
+```
 
 `.env` ファイルの主な設定内容は以下の通りです。これらの設定は、アプリケーションのデータベースやメール送信機能に関連しています。
 
@@ -94,9 +94,9 @@ MAIL_PORT=1025                # Mailhogのポート番号
 
 データベースのマイグレーションを実行し、初期データ（ダミーデータ）を投入します。
 
-
+```bash
 php artisan migrate --seed
-
+```
 
 ---
 
@@ -104,9 +104,9 @@ php artisan migrate --seed
 
 MySQL 8.0 を使用する場合、SSLを無効化するために以下のコマンドを使用します。
 
-
+```bash
 mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
-
+```
 
 このコマンドを使って、MySQLに接続できます。
 
@@ -246,9 +246,9 @@ Seederにより、以下のデータを作成することができます：
 
 以下のコマンドで、ダミーデータを投入できます。
 
-
+```bash
 php artisan db:seed
-
+```
 
 ---
 
@@ -265,13 +265,88 @@ php artisan db:seed
 
 ---
 
-## テストコード実行
+了解しました！**Windows環境** でもセットアップできるように、**MacOS** と **Windows** 両方の手順をREADMEに追加する形でまとめます。
 
-アプリケーションのテストを実行するためのコマンドです。
+---
 
+こちらが整えたREADMEの内容です。**MacOS** と **Windows** の両方の環境で**PHPのインストール**から**テスト実行**までをスムーズに進められるようになっています。
 
+---
+
+## テストコード実行（Windows & MacOS）
+
+Laravelのテストを実行するためには、PHPがインストールされている必要があります。以下の手順で、**MacOS** と **Windows** の両方でPHPをインストールし、テストコードを実行します。
+
+### **1. PHPのインストール**
+
+#### **MacOSの場合**
+
+1. **Homebrewを使ってPHPをインストール**
+
+   MacOSでは **Homebrew** を使用してPHPをインストールできます。以下のコマンドでHomebrewをインストールします：
+
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+
+   次に、PHPをインストールします：
+
+   ```bash
+   brew install php
+   ```
+
+2. **インストール確認**
+
+   PHPが正しくインストールされたことを確認するために、以下のコマンドを実行します：
+
+   ```bash
+   php -v
+   ```
+
+#### **Windowsの場合**
+
+1. **PHPのインストール**
+
+   **Windows**では、[PHP公式サイト](https://windows.php.net/download/)からPHPをインストールするか、**XAMPP** などのパッケージをインストールしてPHPをセットアップできます。
+
+   もし手動でインストールする場合、[PHPのWindows版インストーラ](https://windows.php.net/download/)を使ってインストールします。
+
+2. **インストール確認**
+
+   PHPが正しくインストールされたか確認するために、コマンドプロンプトまたはPowerShellで以下のコマンドを実行します：
+
+   ```bash
+   php -v
+   ```
+
+---
+
+### **2. テストの実行**
+
+PHPが正しくインストールされたら、次にLaravelのテストを実行します。以下のコマンドを実行してテストを開始します：
+
+```bash
 php artisan test
+```
 
+これにより、**Laravelのテストスイート** が実行され、アプリケーションの動作確認ができます。
 
-これにより、Laravelのテストスイートが実行され、アプリケーションの動作確認ができます。
+---
+
+### **3. 依存関係のインストール（もし必要な場合）**
+
+もし依存関係がインストールされていない場合、以下のコマンドでインストールします：
+
+```bash
+docker-compose exec php composer install
+```
+
+---
+
+### **まとめ**
+
+* **MacOSの場合**: Homebrewを使ってPHPをインストールし、ターミナルで`php -v`で確認。
+* **Windowsの場合**: PHP公式サイトまたはXAMPPを使ってPHPをインストールし、コマンドプロンプトで`php -v`で確認。
+* テストの実行: `php artisan test` コマンドでテストスイートを実行。
+* 依存関係のインストール: 必要に応じて、`composer install` でインストール。
 
