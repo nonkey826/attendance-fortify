@@ -1,78 +1,86 @@
-
-
-# 勤怠管理アプリ
+勤怠管理アプリ
 
 ## 概要
 
-本アプリは、出勤・退勤・休憩管理を行う勤怠管理アプリです。
-ユーザーは会員登録後、メール認証を完了しないとログインおよび勤怠機能を利用できません。
+本アプリは、出勤・退勤・休憩管理 を行う勤怠管理アプリケーションです。
+ユーザーは 会員登録 を行った後、メール認証 を完了しないとログインおよび勤怠機能を利用できません。
+また、アプリケーション内でユーザーが実施する操作（出勤、退勤、休憩開始など）を管理者が承認・確認できる機能も実装されています。
 
 ---
 
 ## 使用技術
 
-* Laravel 12
-* PHP 8.4
-* MySQL 8.0
-* Docker
-* Nginx
-* Fortify（認証機能）
+本アプリは以下の技術を使用しています：
+
+* Laravel Framework**（バージョン: ^10.0）
+* PHP 8.4**
+* MySQL 8.0（データベース）
+* Docker（コンテナ化）
+* Nginx**（Webサーバー）
+* Laravel Fortify**（認証機能）
 * Mailhog（開発用メール確認ツール）
 
 ---
 
 ## 環境構築
 
-### 1. Docker起動
+アプリをローカル環境でセットアップするための手順を説明します。以下の手順に従って環境を構築してください。
 
-```bash
+### 1. Dockerの起動
+
+まず、Dockerコンテナを起動します。これにより、必要なすべてのサービス（PHP、MySQL、Nginx、Mailhogなど）が立ち上がります。
+
 docker compose up -d
-```
 
-### 2. PHPコンテナへ入る
 
-```bash
+### 2. PHPコンテナに入る
+
+次に、**PHPコンテナ** にアクセスします。コンテナ内で必要なコマンドを実行できます。
+
 docker compose exec php bash
-```
 
-### 3. 依存関係インストール
 
-```bash
+### 3. 依存関係のインストール
+
+PHPコンテナ内で、Laravelプロジェクトに必要な依存関係をインストールします。
+
+
 composer install
-```
 
 ### 4. 環境ファイル設定
 
-```bash
+`.env.example` ファイルを `.env` にコピーし、アプリケーションの設定を行います。その後、**アプリケーションキー**を生成します。
+
 cp .env.example .env
 php artisan key:generate
-```
 
-### 5. マイグレーション + ダミーデータ投入
+### 5. マイグレーションとダミーデータ投入
 
-```bash
+データベースのマイグレーションを実行し、初期データ（ダミーデータ）を投入します。
+
+
 php artisan migrate --seed
-```
 
-上記手順により、マイグレーションおよびダミーデータ投入まで実行可能です。
 
 ---
 
 ## MySQL 接続
 
-MySQL 8.0 を使用する場合、SSL を無効化するために以下のコマンドを使用します：
+MySQL 8.0 を使用する場合、SSLを無効化するために以下のコマンドを使用します。
 
-```bash
+
 mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
-```
+
+
+このコマンドを使って、MySQLに接続できます。
 
 ---
 
 ## アクセスURL
 
-* アプリ：[http://localhost](http://localhost)
-* Mailhog：[http://localhost:8025](http://localhost:8025)
-* phpMyAdmin：[http://localhost:8085](http://localhost:8085)
+* アプリケーション：[http://localhost](http://localhost)
+* **Mailhog**（開発用メール確認ツール）：[http://localhost:8025](http://localhost:8025)
+* **phpMyAdmin**（データベース管理ツール）：[http://localhost:8085](http://localhost:8085)
 
 ---
 
@@ -80,13 +88,13 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 
 ### 管理者
 
-* email：[admin@test.com](mailto:admin@test.com)
-* password：admin123
+* **Email**: [admin@test.com](mailto:admin@test.com)
+* **Password**: `admin123`
 
 ### 一般ユーザー
 
-* email：[user@test.com](mailto:user@test.com)
-* password：12345678
+* **Email**: [user@test.com](mailto:user@test.com)
+* **Password**: `12345678`
 
 ---
 
@@ -94,18 +102,18 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 
 ### 実装内容
 
-* 新規会員登録時に認証メールを送信
-* メール未認証ユーザーはログイン後もアプリ機能を利用不可
-* verified ミドルウェアにより制御
-* MustVerifyEmail を Userモデルに実装
-* email_verified_at カラムにより認証状態を管理
+* 新規会員登録時に、認証メールを送信します。
+* メール未認証ユーザーはログイン後もアプリ機能を利用できません。
+* `verified` ミドルウェアにより、メール認証状態を制御します。
+* `MustVerifyEmail` を **Userモデル** に実装。
+* `email_verified_at` カラムにより認証状態を管理します。
 
-### 開発環境メール確認方法
+### 開発環境でのメール確認方法
 
-1. [http://localhost:8025](http://localhost:8025) にアクセス
-2. 受信メール一覧から認証メールを選択
-3. メール内の認証リンクをクリック
-4. 認証完了後、勤怠画面へ遷移
+1. Mailhogにアクセス：[http://localhost:8025](http://localhost:8025)
+2. 受信メール一覧から **認証メール** を選択します。
+3. メール内の **認証リンク** をクリックします。
+4. 認証完了後、**勤怠画面** に遷移します。
 
 ---
 
@@ -150,11 +158,13 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 
 ## ダミーデータ
 
-Seederにより以下のデータを作成できます。
+Seederにより、以下のデータを作成することができます：
 
 * 管理者ユーザー
 * 一般ユーザー
 * 勤怠データ
+
+以下のコマンドで、ダミーデータを投入できます。
 
 
 php artisan db:seed
@@ -170,6 +180,4 @@ php artisan db:seed
 
 ## 補足
 
-本アプリでは開発環境にMailhogを使用しています。
-本番環境ではSMTPサーバー（例：SendGrid等）へ切り替えることでメール送信が可能です。
-
+* 本アプリでは、開発環境に Mailhogを使用しています。

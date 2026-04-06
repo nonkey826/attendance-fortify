@@ -32,21 +32,22 @@ class AttendanceCorrectionController extends Controller
 //
 
 $validated = $request->validate([
-    'requested_clock_in_time'  => ['required', 'date_format:H:i'],
+    'requested_clock_in_time'  => ['required', 'date_format:H:i', 'before:requested_clock_out_time'],
     'requested_clock_out_time' => ['required', 'date_format:H:i', 'after:requested_clock_in_time'],
-   'requested_note' => ['required', 'filled'],
+    'requested_note' => ['required', 'filled'],
 
     'breaks' => ['nullable', 'array'],
     'breaks.*.start' => ['nullable', 'date_format:H:i', 'before:requested_clock_out_time'],
     'breaks.*.end'   => ['nullable', 'date_format:H:i', 'after:breaks.*.start', 'before:requested_clock_out_time'],
 ], [
-    'requested_clock_out_time.after' => '出勤時間もしくは退勤時間が不適切な値です',
-
-    'breaks.*.start.before' => '休憩時間が不適切な値です',
-    'breaks.*.end.after'    => '休憩時間が不適切な値です',
-    'breaks.*.end.before'   => '休憩時間もしくは退勤時間が不適切な値です',
-
-    'requested_note.required' => '備考を記入してください',
+    'requested_clock_in_time.before' => '出勤時間が不適切な値です。',
+    'requested_clock_out_time.after' => '退勤時間が不適切な値です。',
+    'breaks.*.start.before' => '休憩時間が不適切な値です。',
+    'breaks.*.end.after'    => '休憩時間もしくは退勤時間が不適切な値です。',
+    'breaks.*.end.before'   => '休憩時間もしくは退勤時間が不適切な値です。',
+    'requested_note.required' => '備考を記入してください。',
+    'requested_clock_in_time.date_format' => '出勤時間はH:iの形式で入力してください。',
+    'requested_clock_out_time.date_format' => '退勤時間はH:iの形式で入力してください。',
 ]);
 
 

@@ -10,7 +10,7 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // 未ログインは auth ミドルウェアに任せる（ここでは判定しない）
+        // 未ログインは auth ミドルウェアに任せる
         if (!auth()->check()) {
             return redirect()->route('admin.login');
         }
