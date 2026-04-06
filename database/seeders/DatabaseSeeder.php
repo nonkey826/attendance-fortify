@@ -38,10 +38,11 @@ class DatabaseSeeder extends Seeder
         // ランダムな日付を生成（過去30日以内の日付）
         $randomDate = Carbon::now()->subDays(rand(1, 30))->toDateString();
 
-        // 勤怠データ
-        Attendance::create([
+        // 重複を避けるために firstOrCreate を使用
+        Attendance::firstOrCreate([
             'user_id' => $user->id,
             'work_date' => $randomDate, // ランダムな日付を設定
+        ], [
             'clock_in_time' => '09:00:00',
             'clock_out_time' => '18:00:00',
             'status' => 'done',
