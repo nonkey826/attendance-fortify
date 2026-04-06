@@ -12,12 +12,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 管理者
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@test.com'],
+        $admin = User::updateOrCreate(
+            ['email' => 'admintest@test.com'],
             [
                 'name' => 'admin',
                 'password' => bcrypt('password'),
-                'role' => 'admin'
+                'role' => 'admin',
             ]
         );
 
@@ -31,15 +31,19 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'user',
                 'password' => bcrypt('12345678'),
-                'role' => 'user'
+                'role' => 'user',
             ]
         );
+
+        // email_verified_at を null にリセット
+$user->email_verified_at = null;
+$user->save();
 
         // ランダムな日付を生成（過去30日以内の日付）
         $randomDate = Carbon::now()->subDays(rand(1, 30))->toDateString();
 
         // 重複を避けるために firstOrCreate を使用
-        Attendance::firstOrCreate([
+        Attendance::updateOrCreate([
             'user_id' => $user->id,
             'work_date' => $randomDate, // ランダムな日付を設定
         ], [

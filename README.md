@@ -60,35 +60,49 @@ PHPコンテナ内で、Laravelプロジェクトに必要な依存関係をイ�
 composer install
 ```
 
+
+
 ### 5. 環境ファイル設定
 
-`.env.example` ファイルを `.env` にコピーして、アプリケーションの設定を行います。その後、**アプリケーションキー**を生成します。
+最初に、`.env.example` ファイルを `.env` にコピーして、アプリケーションの設定を行います。その後、**アプリケーションキー**を生成します。
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-`.env` ファイルの主な設定内容は以下の通りです。これらの設定は、アプリケーションのデータベースやメール送信機能に関連しています。
+`.env` ファイルの主な設定内容は以下の通りです。これらの設定は、アプリケーションのデータベースやメール送信機能に関連しています。各項目を自分の環境に合わせて設定してください。
 
 #### **データベース設定**
 
+使用するデータベースに合わせて、以下の項目を変更します。
+
 ```env
-DB_CONNECTION=mysql            # データベースの接続ドライバ
+DB_CONNECTION=mysql            # データベースの接続ドライバ（通常は mysql）
 DB_HOST=mysql                  # MySQLのホスト名（Dockerサービス名：'mysql'）
-DB_PORT=3306                   # MySQLのポート
-DB_DATABASE=laravel_db         # 使用するデータベース名
-DB_USERNAME=laravel_user       # MySQLのユーザー名
-DB_PASSWORD=laravel_pass       # MySQLのパスワード
+DB_PORT=3306                   # MySQLのポート（通常は3306）
+DB_DATABASE=laravel_db         # 使用するデータベース名（laravel_db）
+DB_USERNAME=laravel_user       # MySQLのユーザー名（laravel_user）
+DB_PASSWORD=laravel_pass       # MySQLのパスワード（laravel_pass）
 ```
 
 #### **メール設定**
 
+メール送信を使用する場合、以下の設定を行います。開発環境では**Mailhog**を使用してメール送信をテストできます。
+
 ```env
-MAIL_MAILER=smtp              # 使用するメール送信の方式（開発環境ではMailhogを使用）
+MAIL_MAILER=smtp              # 使用するメール送信の方式（Mailhogを使用する場合はsmtp）
 MAIL_HOST=mailhog             # Mailhogのホスト名
 MAIL_PORT=1025                # Mailhogのポート番号
+MAIL_USERNAME=null            # Mailhogではユーザー名は必要なし
+MAIL_PASSWORD=null            # Mailhogではパスワードは必要なし
 ```
+
+これで、基本的な環境設定が完了です。必要に応じて、他の設定項目も変更してください。
+
+---
+
+
 
 ### 6. マイグレーションとダミーデータ投入
 
@@ -122,15 +136,13 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 
 ## ログイン情報
 
-### 管理者
+管理者ログイン情報：
+メール: admintest@test.com
+パスワード: password
 
-* **Email**: [admin@test.com](mailto:admin@test.com)
-* **Password**: `admin`
-
-### 一般ユーザー
-
-* **Email**: [user@test.com](mailto:user@test.com)
-* **Password**: `12345678`
+一般ユーザーログイン情報：
+メール: user@test.com
+パスワード: 12345678
 
 ---
 
