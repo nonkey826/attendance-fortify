@@ -196,18 +196,23 @@ docker compose exec php mysql -h mysql -u laravel_user -p"laravel_pass" --skip-s
 
 ## データベース設計
 
+
 ### **usersテーブル**
 
-| カラム名              | 型                    |
-| ----------------- | -------------------- |
-| id                | unsigned bigint      |
-| name              | varchar(255)         |
-| email             | varchar(255)         |
-| password          | varchar(255)         |
-| role              | varchar(50)          |
-| email_verified_at | timestamp (nullable) |
-| created_at        | timestamp            |
-| updated_at        | timestamp            |
+| カラム名                        | 型                    |
+| --------------------------- | -------------------- |
+| id                          | unsigned bigint      |
+| name                        | varchar(255)         |
+| email                       | varchar(255)         |
+| email_verified_at           | timestamp (nullable) |
+| password                    | varchar(255)         |
+| role                        | varchar(50)          |
+| two_factor_secret           | text (nullable)      |
+| two_factor_recovery_codes   | text (nullable)      |
+| two_factor_confirmed_at     | timestamp (nullable) |
+| remember_token              | varchar(100)         |
+| created_at                  | timestamp            |
+| updated_at                  | timestamp            |
 
 ### **attendancesテーブル**
 
@@ -223,24 +228,22 @@ docker compose exec php mysql -h mysql -u laravel_user -p"laravel_pass" --skip-s
 | created_at     | timestamp       |             |
 | updated_at     | timestamp       |             |
 
-### **attendance_correction_requestsテーブル**
+### attendance_correction_requestsテーブル
 
-| カラム名                     | 型               | 制約                |
-| ------------------------ | --------------- | ----------------- |
-| id                       | unsigned bigint | 主キー               |
-| attendance_id            | unsigned bigint | 外部キー(attendances) |
-| user_id                  | unsigned bigint | 外部キー(users)       |
-| requested_clock_in_time  | time            |                   |
-| requested_clock_out_time | time            |                   |
-| requested_note           | text            |                   |
-| status                   | varchar(50)     |                   |
-| created_at               | timestamp       |                   |
-| updated_at               | timestamp       |                   |
-| approved_by              | unsigned bigint | 外部キー(users)       |
-| approved_at              | datetime        |                   |
-| requested_break_start    | text            | JSON配列（休憩開始時刻）    |
-| requested_break_end      | text            | JSON配列（休憩終了時刻）    |
-| admin_comment            | text            |                   |
+| カラム名                     | 型               |
+| ------------------------ | --------------- |
+| id                       | unsigned bigint |
+| attendance_id            | unsigned bigint |
+| user_id                  | unsigned bigint |
+| requested_work_date      | date            |
+| requested_clock_in_time  | time            |
+| requested_clock_out_time | time            |
+| requested_break_start_time | time          |
+| requested_break_end_time | time            |
+| requested_note           | text            |
+| status                   | varchar(50)     |
+| created_at               | timestamp       |
+| updated_at               | timestamp       |
 
 ### **breaksテーブル**
 
@@ -259,7 +262,7 @@ docker compose exec php mysql -h mysql -u laravel_user -p"laravel_pass" --skip-s
 
 ## ER図
 
-![ER図](resources/docs/ER.png)
+![ER図](resources/css/er.png)
 
 ---
 
