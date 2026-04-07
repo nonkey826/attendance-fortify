@@ -61,6 +61,7 @@ docker compose exec php composer install
 ### 4. 環境ファイルの設定
 
 `.env.example` をコピーして `.env` を作成します。
+コピー後、.env ファイルの以下の項目を確認・必要に応じて修正してください。
 
 ```bash
 cp .env.example .env
