@@ -8,141 +8,162 @@
 
 ---
 
+了解👌
+👉 **削らずに「分かりやすくするだけ」に調整した版**いく
+
+---
+
+````md
+# 勤怠管理アプリ
+
+## 概要
+
+本アプリは、**出勤・退勤・休憩管理** を行う勤怠管理アプリケーションです。  
+ユーザーは **会員登録** を行った後、**メール認証** を完了しないとログインおよび勤怠機能を利用できません。  
+また、ユーザーの操作（出勤、退勤、休憩開始など）を、管理者が承認・確認できる機能を実装しています。
+
+---
+
 ## 使用技術
 
-本アプリは以下の技術を使用しています：
-
-* **Laravel Framework**（バージョン: ^10.0）
-* **PHP 8.4**
-* **MySQL 8.0**（データベース）
-* **Docker**（コンテナ化）
-* **Nginx**（Webサーバー）
-* **Laravel Fortify**（認証機能）
-* **Mailhog**（開発用メール確認ツール）
+- Laravel Framework（^10.0）
+- PHP 8.4
+- MySQL 8.0
+- Docker
+- Nginx
+- Laravel Fortify（認証機能）
+- Mailhog（開発用メール確認ツール）
 
 ---
 
 ## 環境構築
 
-アプリをローカル環境でセットアップするための手順を説明します。以下の手順に従って環境を構築してください。
+以下の手順を上から順番に実行してください。
+
+---
 
 ### 1. GitHubリポジトリをクローン
 
-まず、GitHubからプロジェクトをクローンします。
-
 ```bash
 git clone https://github.com/nonkey826/attendance-fortify.git
-
 cd attendance-fortify
-```
+````
+
+---
 
 ### 2. Dockerの起動
 
-Dockerコンテナを起動します。これにより、必要なすべてのサービス（PHP、MySQL、Nginx、Mailhogなど）が立ち上がります。
+Dockerコンテナを起動します。
+（PHP / MySQL / Nginx / Mailhog などが同時に立ち上がります）
 
 ```bash
 docker compose up -d
 ```
 
-### 3. PHPコンテナに入る
+---
 
-次に、**PHPコンテナ** にアクセスします。コンテナ内で必要なコマンドを実行できます。
+### 3. 依存関係のインストール
 
-```bash
-docker compose exec php bash
-```
-
-### 4. 依存関係のインストール
-
-PHPコンテナ内で、Laravelプロジェクトに必要な依存関係をインストールします。
+Laravelプロジェクトに必要なパッケージをインストールします。
+※ PHPコンテナ内で実行されます
 
 ```bash
-composer install
+docker compose exec php composer install
 ```
 
+---
 
+### 4. 環境ファイルの設定
 
-### 5. 環境ファイル設定
-
-最初に、`.env.example` ファイルを `.env` にコピーして、アプリケーションの設定を行います。その後、**アプリケーションキー**を生成します。
+`.env.example` をコピーして `.env` を作成します。
 
 ```bash
 cp .env.example .env
-php artisan key:generate
 ```
-
-`.env` ファイルの主な設定内容は以下の通りです。これらの設定は、アプリケーションのデータベースやメール送信機能に関連しています。各項目を自分の環境に合わせて設定してください。
-
-#### **データベース設定**
-
-使用するデータベースに合わせて、以下の項目を変更します。
-
-```env
-DB_CONNECTION=mysql            # データベースの接続ドライバ（通常は mysql）
-DB_HOST=mysql                  # MySQLのホスト名（Dockerサービス名：'mysql'）
-DB_PORT=3306                   # MySQLのポート（通常は3306）
-DB_DATABASE=laravel_db         # 使用するデータベース名（laravel_db）
-DB_USERNAME=laravel_user       # MySQLのユーザー名（laravel_user）
-DB_PASSWORD=laravel_pass       # MySQLのパスワード（laravel_pass）
-```
-
-#### **メール設定**
-
-メール送信を使用する場合、以下の設定を行います。開発環境では**Mailhog**を使用してメール送信をテストできます。
-
-```env
-MAIL_MAILER=smtp              # 使用するメール送信の方式（Mailhogを使用する場合はsmtp）
-MAIL_HOST=mailhog             # Mailhogのホスト名
-MAIL_PORT=1025                # Mailhogのポート番号
-MAIL_USERNAME=null            # Mailhogではユーザー名は必要なし
-MAIL_PASSWORD=null            # Mailhogではパスワードは必要なし
-```
-
-これで、基本的な環境設定が完了です。必要に応じて、他の設定項目も変更してください。
 
 ---
 
+#### データベース設定
 
+```env
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel_db
+DB_USERNAME=laravel_user
+DB_PASSWORD=laravel_pass
+```
+
+---
+
+#### メール設定（Mailhog）
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mailhog
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+---
+
+### 5. アプリケーションキーの生成
+
+```bash
+docker compose exec php php artisan key:generate
+```
+
+---
 
 ### 6. マイグレーションとダミーデータ投入
 
-データベースのマイグレーションを実行し、初期データ（ダミーデータ）を投入します。
+データベースのテーブル作成と初期データの投入を行います。
 
 ```bash
-php artisan migrate --seed
+docker compose exec php php artisan migrate --seed
 ```
+
+このコマンドで以下のデータが作成されます：
+
+* 管理者ユーザー
+* 一般ユーザー
+* 勤怠データ
 
 ---
 
-## MySQL 接続
-
-MySQL 8.0 を使用する場合、SSLを無効化するために以下のコマンドを使用します。
+## MySQL接続（必要な場合のみ）
 
 ```bash
-mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
+docker compose exec php mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 ```
-
-このコマンドを使って、MySQLに接続できます。
 
 ---
 
 ## アクセスURL
 
-* アプリケーション：[http://localhost](http://localhost)
-* **Mailhog**（開発用メール確認ツール）：[http://localhost:8025](http://localhost:8025)
-* **phpMyAdmin**（データベース管理ツール）：[http://localhost:8085](http://localhost:8085)
+* アプリ：[http://localhost](http://localhost)
+* Mailhog：[http://localhost:8025](http://localhost:8025)
+* phpMyAdmin：[http://localhost:8085](http://localhost:8085)
 
 ---
 
 ## ログイン情報
 
-管理者ログイン情報：
-メール: admintest@test.com
-パスワード: password
+### 管理者
 
-一般ユーザーログイン情報：
-メール: user@test.com
-パスワード: 12345678
+* メール：[admintest@test.com](mailto:admintest@test.com)
+* パスワード：password
+
+### 一般ユーザー
+
+* メール：[user@test.com](mailto:user@test.com)
+* パスワード：12345678
+
+
 
 ---
 
@@ -246,21 +267,7 @@ mysql -h mysql -u laravel_user -p"laravel_pass" --skip-ssl
 | created_at       | timestamp       |                   |
 | updated_at       | timestamp       |                   |
 
----
 
-## ダミーデータ
-
-Seederにより、以下のデータを作成することができます：
-
-* 管理者ユーザー
-* 一般ユーザー
-* 勤怠データ
-
-以下のコマンドで、ダミーデータを投入できます。
-
-```bash
-php artisan db:seed
-```
 
 ---
 
